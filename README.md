@@ -16,6 +16,11 @@ Import translation files into MongoDB. If no files is specified, the command wil
 
 Export translations to translation files from MongoDB. If no files is specified, the command will search for files in translations directories in src/
 
+
+## Screenshot
+
+<img src="http://farm8.staticflickr.com/7158/6668570353_1b852e0e7b_b_d.jpg" />
+
 ## Installation:
 
 Download or clone the bundle. If you use deps file add it like this:
