@@ -1,0 +1,26 @@
+{
+    "name": "servergrove/translation-editor-bundle",
+    "description": "Web based UI to manage Symfony2 translations",
+    "keywords": ["symfony2", "translations", "locale"],
+    "homepage": "http://github.com/servergrove/TranslationEditorBundle",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "version": "1.0.0",
+    "authors": [
+        {
+            "name":" Pablo Godel",
+            "email": "pablo@servergrove.com",
+            "homepage": "http://servergrove.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.2",
+        "symfony/framework-bundle": "2.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "ServerGrove\\Bundle\\TranslationEditorBundle": ""
+        }
+    },
+    "target-dir": "ServerGrove/Bundle/TranslationEditorBundle"
+}
