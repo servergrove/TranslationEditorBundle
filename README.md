@@ -65,6 +65,12 @@ The mongodb parameters defines the mongodb server to connect to.
 	# enable bundle extension
 	server_grove_translation_editor: ~
 
+Add the routing configuration to app/config/routing_dev.yml
+
+	SGTranslationEditorBundle:
+		resource: "@ServerGroveTranslationEditorBundle/Resources/config/routing.yml"
+		prefix:   /
+
 ## Usage:
 
 1. Import translation files into mongodb
