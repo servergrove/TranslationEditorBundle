@@ -92,6 +92,8 @@ Add the routing configuration to app/config/routing_dev.yml
 
 ## TODO
 
+* Support for xliff files
+* Import strings from twig files
 * Ability to edit key
 * Add Google Translate API interface
 * Add Search capabilities
