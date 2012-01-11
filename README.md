@@ -92,7 +92,7 @@ Add the routing configuration to app/config/routing_dev.yml
 
 ## WARNING
 
-**PLEASE** Backup your translation files before using the editor. **Use a source control system like git, even svn is ok** We are not responsible for lose of information.
+**PLEASE** Backup your translation files before using the editor. **Use a source control system like git, even svn is ok**. We are not responsible for lost information.
 
 ## TODO
 
