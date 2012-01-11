@@ -90,8 +90,13 @@ Add the routing configuration to app/config/routing_dev.yml
 
 	./app/console locale:editor:export
 
+## WARNING
+
+**PLEASE** Backup your translation files before using the editor. **Use a source control system like git, even svn is ok** We are not responsible for lose of information.
+
 ## TODO
 
+* Support for nested yml format
 * Support for xliff files
 * Import strings from twig files
 * Ability to edit key
