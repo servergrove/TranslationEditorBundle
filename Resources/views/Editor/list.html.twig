@@ -162,7 +162,7 @@
             </div>
             <div id="editor-{{loop.parent.loop.index}}-{{locale}}" class="editor">
                 <textarea>{% if exists %}{{v.entries[key]}}{%endif%}</textarea><br/>
-                <input id="save-{{loop.parent.loop.index}}-{{locale}}"class="btn mysmall success" type="button" value="Save" onclick="saveChange('{{loop.parent.loop.index}}-{{locale}}', '{{key}}', '{{locale}}')">
+                <input id="save-{{loop.parent.loop.index}}-{{locale}}"class="btn mysmall success" type="button" value="Save" onclick="saveChange('{{loop.parent.loop.index}}-{{locale}}', '{{key|e('js')}}', '{{locale}}')">
                 <input class="btn mysmall" type="button" value="Cancel" onclick="hideEditor('{{loop.parent.loop.index}}-{{locale}}')">
             </div>
         </td>
