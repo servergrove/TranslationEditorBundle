@@ -29,8 +29,10 @@ class EditorController extends Controller
                     'data'    => array()
                 );
             }
-            $locales[$d['locale']]['entries'] = array_merge($locales[$d['locale']]['entries'], $d['entries']);
-            $locales[$d['locale']]['data'][$d['filename']] = $d;
+            if (is_array($d['entries'])) {
+                $locales[$d['locale']]['entries'] = array_merge($locales[$d['locale']]['entries'], $d['entries']);
+                $locales[$d['locale']]['data'][$d['filename']] = $d;
+            }
         }
 
         $keys = array_keys($locales);
