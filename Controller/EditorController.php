@@ -23,7 +23,14 @@ class EditorController extends Controller
         $missing = array();
 
         foreach ($data as $d) {
-            $locales[$d['locale']] = $d;
+            if (!isset($locales[$d['locale']])) {
+                $locales[$d['locale']] = array(
+                    'entries' => array(),
+                    'data'    => array()
+                );
+            }
+            $locales[$d['locale']]['entries'] = array_merge($locales[$d['locale']]['entries'], $d['entries']);
+            $locales[$d['locale']]['data'][$d['filename']] = $d;
         }
 
         $keys = array_keys($locales);
