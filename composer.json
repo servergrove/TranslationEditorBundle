@@ -5,7 +5,7 @@
     "homepage": "http://github.com/servergrove/TranslationEditorBundle",
     "type": "symfony-bundle",
     "license": "MIT",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "authors": [
         {
             "name":" Pablo Godel",

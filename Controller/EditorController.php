@@ -94,13 +94,15 @@ class EditorController extends Controller
             $found = false;
             foreach ($values as $data) {
                 if (isset($data['entries'][$key])) {
-                    $found = true;
-                    break;
+                    $res = array(
+                        'result' => false,
+                        'msg' => 'The key already exists. Please update it instead.',
+                    );
+                    return new \Symfony\Component\HttpFoundation\Response(json_encode($res));
                 }
             }
-            if (!$found) {
-                $data = array_pop($values);
-            }
+
+            $data = array_pop($values);
 
             $data['entries'][$key] = $val;
             $this->updateData($data);

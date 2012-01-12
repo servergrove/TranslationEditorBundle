@@ -80,9 +80,15 @@
     {
         if (data && data.result) {
             $('#key').val('');
+            $('#key').focus();
             $('#newtranslation textarea').val('');
             $('#insert-ok').show();
         } else {
+			if (data && data.msg) {
+				$('#errmsg').html(': ' + data.msg);
+			} else {
+				$('#errmsg').html('');
+			}
             $('#insert-error').show();
         }
 
@@ -127,7 +133,7 @@
     <input class="btn" type="button" value="Cancel" onclick="$('.alert-message').hide();$('#newtranslation').hide()">
     
     <p id="insert-ok" class="alert-message success" style="display: none">New translation inserted successfully</p>
-    <p id="insert-error" class="alert-message error" style="display: none">An error ocurred while adding the translation</p>
+    <p id="insert-error" class="alert-message error" style="display: none">An error ocurred while adding the translation<span id="errmsg"></span></p>
 </form>
 <table class="zebra-striped">
     <thead>
