@@ -105,7 +105,10 @@ class EditorController extends Controller
             $data = array_pop($values);
 
             $data['entries'][$key] = $val;
-            $this->updateData($data);
+
+            if (!$request->request->get('check-only')) {
+                $this->updateData($data);
+            }
         }
         if ($request->isXmlHttpRequest()) {
             $res = array(
