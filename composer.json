@@ -1,7 +1,7 @@
 {
     "name": "servergrove/translation-editor-bundle",
     "description": "Web based UI to manage Symfony2 translations",
-    "keywords": ["symfony2", "translations", "locale"],
+    "keywords": ["symfony2", "translations", "locale", "editor"],
     "homepage": "http://github.com/servergrove/TranslationEditorBundle",
     "type": "symfony-bundle",
     "license": "MIT",
