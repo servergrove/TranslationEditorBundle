@@ -1,5 +1,8 @@
 # Changelog
 
+* 1.0.3 (2012-01-16)
+	* Using Yaml:Dumper to export translations to fix issues with special characters in keys
+
 * 1.0.2 (2012-01-13)
 	* Added check for existence of key
 

@@ -7,7 +7,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Finder\Finder;
-
+use Symfony\Component\Yaml\Dumper;
 /**
  * Command for exporting translations into files
  */
@@ -92,10 +92,9 @@ class ExportCommand extends Base
                     return;
                 }
 
-                $result = '';
-                foreach($data['entries'] as $key => $val) {
-                    $result .= $key.': '.$val.PHP_EOL;
-                }
+                $dumper = new Dumper();
+
+                $result = $dumper->dump($data['entries'], 1);
 
                 $this->output->writeln("  Writing ".count($data['entries'])." entries to $filename");
                 if (!$this->input->getOption('dry-run')) {
