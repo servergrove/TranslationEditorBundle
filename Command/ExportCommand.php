@@ -92,8 +92,13 @@ class ExportCommand extends Base
                     return;
                 }
 
-                $dumper = new Dumper();
+                foreach($data['entries'] as $key => $val) {
+                    if (empty($val)) {
+                        unset($data['entries'][$key]);
+                    }
+                }
 
+                $dumper = new Dumper();
                 $result = $dumper->dump($data['entries'], 1);
 
                 $this->output->writeln("  Writing ".count($data['entries'])." entries to $filename");
