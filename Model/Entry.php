@@ -24,6 +24,11 @@ abstract class Entry implements EntryInterface
     /**
      * @var string
      */
+    protected $fileName;
+
+    /**
+     * @var string
+     */
     protected $alias;
 
     /**
@@ -64,6 +69,22 @@ abstract class Entry implements EntryInterface
     public function setDomain($domain)
     {
         $this->domain = $domain;
+    }
+
+    /**
+     * {{@inheritdoc}}
+     */
+    public function getFileName()
+    {
+        return $this->fileName;
+    }
+
+    /**
+     * {{@inheritdoc}}
+     */
+    public function setFileName($fileName)
+    {
+        $this->fileName = $fileName;
     }
 
     /**

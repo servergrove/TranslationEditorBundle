@@ -18,6 +18,11 @@
                type="string"
                length="50"/>
 
+        <field name="fileName"
+               column="file_name"
+               type="string"
+               length="50"/>
+
         <field name="alias"
                column="alias"
                type="string"/>

@@ -24,6 +24,20 @@ interface EntryInterface
     public function setDomain($domain);
 
     /**
+     * Retrieve the Entry file name
+     *
+     * @return string
+     */
+    public function getFileName();
+
+    /**
+     * Define the Entry file name
+     *
+     * @param string $fileName
+     */
+    public function setFileName($fileName);
+
+    /**
      * Retrieve the Entry alias
      *
      * @return string
