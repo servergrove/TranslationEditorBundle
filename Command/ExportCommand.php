@@ -124,13 +124,13 @@ class ExportCommand extends Base
             		$unit->addChild("target", $target);
             	}
 
-            	$xml = html_entity_decode($xml->asXML(), ENT_NOQUOTES, 'UTF-8');
+                $result = $xml->asXML();
                 break;
         }
 
         $this->output->writeln("  Writing ".count($data['entries'])." entries to $filename");
         if (!$this->input->getOption('dry-run')) {
-    		file_put_contents($filename, $xml);
+    		file_put_contents($filename, $result);
     	}
     }
 
