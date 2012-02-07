@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="ServerGrove\Bundle\TranslationEditorBundle\Entity\Locale"
+            table="sg_translation_entry">
+
+        <id name="id"
+            type="integer"
+            column="id">
+            <generator strategy="AUTO"/>
+        </id>
+
+        <field name="language"
+               column="language"
+               type="string"
+               length="2"/>
+
+        <field name="country"
+               column="country"
+               type="string"
+               length="2"
+               nullable="true"
+               unique="true"/>
+
+        <field name="active"
+               column="active"
+               type="boolean"/>
+
+        <many-to-one target-entity="ServerGrove\Bundle\TranslationEditorBundle\Entity\Translation"
+                     field="translations"
+                     inversed-by="entry"
+                     fetch="EXTRALAZY"/>
+
+    </entity>
+
+</doctrine-mapping>

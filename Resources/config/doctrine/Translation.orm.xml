@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="ServerGrove\Bundle\TranslationEditorBundle\Entity\Translation"
+            table="sg_translation_value">
+
+        <id name="id"
+            type="integer"
+            column="id">
+            <generator strategy="AUTO"/>
+        </id>
+
+        <field name="value"
+               column="value"
+               type="string"/>
+
+        <one-to-many target-entity="ServerGrove\Bundle\TranslationEditorBundle\Entity\Entry"
+                     mapped-by="entry"
+                     field="entry">
+            <cascade>
+                <cascade-persist/>
+                <cascade-refresh/>
+            </cascade>
+        </one-to-many>
+
+        <one-to-many target-entity="ServerGrove\Bundle\TranslationEditorBundle\Entity\Locale"
+                     mapped-by="locale"
+                     field="locale">
+            <cascade>
+                <cascade-persist/>
+                <cascade-refresh/>
+            </cascade>
+        </one-to-many>
+
+    </entity>
+
+</doctrine-mapping>

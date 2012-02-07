@@ -4,9 +4,20 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
-  <services>
-        <service id="server_grove_translation_editor.storage_manager" class="ServerGrove\Bundle\TranslationEditorBundle\MongoStorageManager">
-            <argument type="service" id="service_container" />
+    <services>
+
+        <service id="server_grove_translation_editor.storage" class="ServerGrove\Bundle\TranslationEditorBundle\Service\StorageService">
+            <argument>%server_grove_translation_editor.storage.type%</argument>
+            <argument type="service" id="server_grove_translation_editor.storage.manager"/>
         </service>
-  </services>
+
+        <service id="server_grove_translation_editor.storage.manager" factory-method="get" factory-service="service_container" class="Doctrine\Common\Persistence\ObjectManager" public="false">
+            <argument>%server_grove_translation_editor.storage.manager%</argument>
+        </service>
+
+        <service id="server_grove_translation_editor.storage_manager" class="ServerGrove\Bundle\TranslationEditorBundle\MongoStorageManager">
+            <argument type="service" id="service_container"/>
+        </service>
+
+    </services>
 </container>

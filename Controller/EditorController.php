@@ -13,6 +13,11 @@ class EditorController extends Controller
 
     public function listAction()
     {
+        echo '<pre>';
+        \Doctrine\Common\Util\Debug::dump($this->container->get('server_grove_translation_editor.storage'));
+        echo '</pre>';
+        die;
+
         $data = $this->getCollection()->find();
 
         $data->sort(array('locale' => 1));
