@@ -112,7 +112,7 @@ class ExportCommand extends Base
 
             	$body = $xliff_file->addChild('body');
 
-            	$i = 1;
+            	$i = 0;
             	foreach ($data['entries'] as $source => $target) {
             		if (empty($target)) {
             			continue;
