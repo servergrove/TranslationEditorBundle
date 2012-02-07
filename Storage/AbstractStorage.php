@@ -17,11 +17,11 @@ abstract class AbstractStorage
     protected $objectManager;
 
     /**
-     * Define te Persistence Object Manager
+     * Constructor
      *
      * @param \Doctrine\Common\Persistence\ObjectManager $objectManager
      */
-    public function setObjectManager(ObjectManager $objectManager)
+    public function __construct(ObjectManager $objectManager)
     {
         $this->objectManager = $objectManager;
     }

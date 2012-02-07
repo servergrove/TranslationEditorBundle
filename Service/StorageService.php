@@ -4,7 +4,7 @@ namespace ServerGrove\Bundle\TranslationEditorBundle\Service;
 
 use Doctrine\Common\Persistence\ObjectManager;
 
-use ServerGrove\Bundle\TranslationEditorBundle\Storage;
+use ServerGrove\Bundle\TranslationEditorBundle\Storage\StorageInterface;
 
 /**
  * StorageService
@@ -13,10 +13,6 @@ use ServerGrove\Bundle\TranslationEditorBundle\Storage;
  */
 class StorageService
 {
-    static private $STORAGES = array(
-        'orm' => 'ServerGrove\Bundle\TranslationEditorBundle\Storage\ORMStorage',
-    );
-
     /**
      * @var ServerGrove\Bundle\TranslationEditorBundle\Storage\StorageInterface
      */
@@ -28,26 +24,13 @@ class StorageService
      * @param string $type
      * @param \Doctrine\Common\Persistence\ObjectManager $objectManager
      */
-    public function __construct($type, ObjectManager $objectManager)
+    public function __construct(StorageInterface $storage)
     {
-        $this->storage = new self::$STORAGES[$type];
-
-        $this->storage->setObjectManager($objectManager);
+        $this->storage = $storage;
     }
 
     public function getTranslations()
     {
         return $this->storage->getTranslations();
-    }
-
-    /**
-     * Add a new Storage type
-     *
-     * @param string $type
-     * @param string $class
-     */
-    static public function addStorageType($type, $class)
-    {
-        self::$STORAGES[$type] = $class;
     }
 }

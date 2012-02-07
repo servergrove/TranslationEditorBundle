@@ -7,7 +7,14 @@
     <services>
 
         <service id="server_grove_translation_editor.storage" class="ServerGrove\Bundle\TranslationEditorBundle\Service\StorageService">
+            <argument type="service" id="server_grove_translation_editor.storage.type"/>
+        </service>
+
+        <service id="server_grove_translation_editor.storage.type" factory-method="get" factory-service="service_container" class="ServerGrove\Bundle\TranslationEditorBundle\Storage\StorageInterface" public="false">
             <argument>%server_grove_translation_editor.storage.type%</argument>
+        </service>
+
+        <service id="server_grove_translation_editor.storage.type.orm" class="ServerGrove\Bundle\TranslationEditorBundle\Storage\ORMStorage">
             <argument type="service" id="server_grove_translation_editor.storage.manager"/>
         </service>
 

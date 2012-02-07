@@ -20,17 +20,11 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('server_grove_translation_editor');
 
-        $supportedStorages = array('orm');
-
         $rootNode
             ->children()
                 ->arrayNode('storage')
                     ->children()
                         ->scalarNode('type')
-                            ->validate()
-                                ->ifNotInArray($supportedStorages)
-                                ->thenInvalid('The storage type "%s" is not supported. Please choose one of: ' . json_encode($supportedStorages))
-                            ->end()
                             ->cannotBeOverwritten()
                             ->isRequired()
                             ->cannotBeEmpty()
