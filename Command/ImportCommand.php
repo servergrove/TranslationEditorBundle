@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Parser;
+use Symfony\Component\Translation\Loader\XliffFileLoader;
 
 /**
  * Command for importing translation files
@@ -110,8 +111,36 @@ class ImportCommand extends Base
                 }
                 break;
             case 'xliff':
-                $this->output->writeln("  Skipping, not implemented");
-                break;
+                $loader = new XliffFileLoader();
+                $xliff  = $loader->load($filename, $locale, $name);
+            	
+            	$data = $this->getContainer()->get('server_grove_translation_editor.storage_manager')->getCollection()->findOne(array('filename' => $filename));
+            	if (!$data) {
+            		$data = array(
+            			'filename' => $filename,
+            			'locale'   => $locale,
+            			'type'     => $type,
+            			'entries'  => array()
+            		);
+            	}
+            	
+            	$this->output->writeln("  Found ".count($xliff->getDomains())." domains...");
+            	
+            	$entries = $xliff->all();
+            	
+            	foreach ($xliff->getDomains() as $domain) {
+            		$this->output->writeln("  Processing '$domain' domain");
+            		$value = $entries[$domain];
+            		
+            		$this->output->writeln("  Found ".count($value)." entries...");
+            		$data['entries'] = $value;
+            		
+	            	if (!$this->input->getOption('dry-run')) {
+	                    $this->updateValue($data);
+	                }
+            	}
+            	
+            	break;
         }
     }
 
