@@ -87,21 +87,21 @@ class ImportCommand extends Base
 
         $this->setIndexes();
 
+        $data = $this->getContainer()->get('server_grove_translation_editor.storage_manager')->getCollection()->findOne(array('filename'=>$filename));
+        if (!$data) {
+        	$data = array(
+        			'filename' => $filename,
+        			'locale'   => $locale,
+        			'type'     => $type,
+        			'entries'  => array(),
+        	);
+        
+        }
+
         switch($type) {
             case 'yml':
                 $yaml = new Parser();
                 $value = $yaml->parse(file_get_contents($filename));
-
-                $data = $this->getContainer()->get('server_grove_translation_editor.storage_manager')->getCollection()->findOne(array('filename'=>$filename));
-                if (!$data) {
-                    $data = array(
-                        'filename' => $filename,
-                        'locale' => $locale,
-                        'type' => $type,
-                        'entries' => array(),
-                    );
-
-                }
 
                 $this->output->writeln("  Found ".count($value)." entries...");
                 $data['entries'] = $value;
@@ -113,16 +113,6 @@ class ImportCommand extends Base
             case 'xliff':
                 $loader = new XliffFileLoader();
                 $xliff  = $loader->load($filename, $locale, $name);
-            	
-            	$data = $this->getContainer()->get('server_grove_translation_editor.storage_manager')->getCollection()->findOne(array('filename' => $filename));
-            	if (!$data) {
-            		$data = array(
-            			'filename' => $filename,
-            			'locale'   => $locale,
-            			'type'     => $type,
-            			'entries'  => array()
-            		);
-            	}
             	
             	$this->output->writeln("  Found ".count($xliff->getDomains())." domains...");
             	
