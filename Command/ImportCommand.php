@@ -9,8 +9,12 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Parser;
 
+use ServerGrove\Entity\Entry as TranslationPackage;
 /**
  * Command for importing translation files
+ *
+ * Additional authors:
+ * @author Juti Noppornpitak <jnopporn@shiroyuki.com>
  */
 
 class ImportCommand extends Base
@@ -79,43 +83,99 @@ class ImportCommand extends Base
 
     public function import($filename)
     {
-        $fname = basename($filename);
         $this->output->writeln("Processing <info>".$filename."</info>...");
 
-        list($name, $locale, $type) = explode('.', $fname);
-
-        $this->setIndexes();
-
+        list($name, $locale, $type) = $this->extractNameLocaleType($filename);
+        
         switch($type) {
             case 'yml':
-                $yaml = new Parser();
-                $value = $yaml->parse(file_get_contents($filename));
-
-                $data = $this->getContainer()->get('server_grove_translation_editor.storage_manager')->getCollection()->findOne(array('filename'=>$filename));
-                if (!$data) {
-                    $data = array(
-                        'filename' => $filename,
-                        'locale' => $locale,
-                        'type' => $type,
-                        'entries' => array(),
-                    );
-
-                }
-
-                $this->output->writeln("  Found ".count($value)." entries...");
-                $data['entries'] = $value;
-
-                if (!$this->input->getOption('dry-run')) {
-                    $this->updateValue($data);
-                }
+            case 'yaml':
+                $this->importYaml($filename, $name, $locale);
                 break;
             case 'xliff':
-                $this->output->writeln("  Skipping, not implemented");
+                $this->importXml($filename, $name, $locale);
                 break;
         }
     }
+    
+    protected function extractNameLocaleType($filename) {
+        // Gather information for re-assembly.
+        list($name, $locale, $type) = explode('.', basename($fname));
+        list($language, $territory) = preg_split('/(-|_)/', $locale, 2);
+        
+        // Fix the inconsistency in naming convention.
+        $language  = strtolower($language);
+        $territory = strtoupper($territory);
+        $type      = strtolower($type);
+        
+        // Re-assemble the locale ID.
+        $locale = sprintf('%s-%s', $language, $territory);
+        
+        return array($name, $locale, $type);
+    }
+    
+    protected function importXml($filename, $name, $locale)
+    {
+        $xml = simplexml_load_file(file_get_contents($filename));
+        
+        // Load the data from the storage service.
+        $entries = $this->getContainer()
+           ->get('server_grove_translation_editor.storage')
+           ->getEntries(array('locale'=>$locale));
+        
+        $this->output->writeln(sprintf('  Found entries: %d', count($entries)));
+        
+        if ( ! $entries) {
+            $entries = TranslationPackage();
+        }
+        foreach ($entries->getTranslations() as $translation) {
+            $translation;
+        }
+        
+    }
+    
+    /**
+     * Import from a YAML file.
+     *
+     * @param string $filename
+     * @param string $name
+     * @param string $locale
+     */
+    protected function importYaml($filename, $name, $locale)
+    {
+        throw \Exception('Code not updated');
+        
+        $this->setMongoIndexes();
+        
+        $type = 'yml';
+        
+        $yaml = new Parser();
+        $value = $yaml->parse(file_get_contents($filename));
 
-    protected function setIndexes()
+        $data = $this->getContainer()
+            ->get('server_grove_translation_editor.storage_manager')
+            ->getCollection()
+            ->findOne(array('filename'=>$filename));
+        
+        if (!$data) {
+            $data = array(
+                'filename' => $filename,
+                'locale' => $locale,
+                'type' => $type,
+                'entries' => array(),
+            );
+
+        }
+
+        $this->output->writeln("  Found ".count($value)." entries...");
+        $data['entries'] = $value;
+
+        if (!$this->input->getOption('dry-run')) {
+            $this->updateValue($data);
+        }
+    }
+
+    protected function setMongoIndexes()
     {
         $collection = $this->getContainer()->get('server_grove_translation_editor.storage_manager')->getCollection();
         $collection->ensureIndex( array( "filename" => 1, 'locale' => 1 ) );
