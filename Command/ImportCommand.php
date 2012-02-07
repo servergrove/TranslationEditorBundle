@@ -76,7 +76,7 @@ class ImportCommand extends Base
         $domains          = array();
 
         $bundles = array_filter(
-            $kernelService->getBundles(),
+            $kernel->getBundles(),
             function ($bundle) use ($srcRootDirectory) {
                 return (strpos($bundle->getPath(), $srcRootDirectory) === 0);
             }
@@ -158,6 +158,8 @@ class ImportCommand extends Base
     }
 
     /**
+     * Get an existed locale or create and return a new locale.
+     * 
      * @return \ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface
      */
     protected function getOrCreateLocale($language, $country)

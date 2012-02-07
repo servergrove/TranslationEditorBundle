@@ -62,6 +62,22 @@ class ORMStorage extends AbstractStorage implements StorageInterface
 
         return null;
     }
+    
+    /**
+     * Create a new Locale.
+     *
+     * @param string $language
+     * @param string $country
+     */
+    public function createLocale($language, $country)
+    {
+        $locale = new \ServerGrove\Bundle\TranslationEditorBundle\Entity\Locale();
+        
+        $locale->setLanguage($language);
+        $locale->setCountry($country);
+        
+        return $locale;
+    }
 
     /**
      * Retireve the Entry array
