@@ -15,6 +15,7 @@ use ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface;
  * Command for importing translation files
  *
  * Additional authors:
+ * @author Guilherme Blanco <guilhermeblanco@hotmail.com>
  * @author Juti Noppornpitak <jnopporn@shiroyuki.com>
  */
 
@@ -26,115 +27,187 @@ class ImportCommand extends Base
         parent::configure();
 
         $this
-        ->setName('locale:editor:import')
-        ->setDescription('Import translation files into MongoDB for using through /translations/editor')
-        ->addArgument('filename')
-        ->addOption("dry-run")
-        ;
-
+            ->setName('locale:editor:import')
+            ->setDescription('Import translation files into MongoDB for using through /translations/editor');
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->input = $input;
+        $this->input  = $input;
         $this->output = $output;
 
-        $filename = $input->getArgument('filename');
+        $this->output->writeln('Scanning register bundles...');
 
-        $files = array();
+        $kernel     = $this->getContainer()->get('kernel');
+        $domains    = $this->getDomainList($kernel);
+        $filesCount = array_sum(
+            array_map(
+                function ($domain) {
+                    return count($domain['files']);
+                },
+                $domains
+            )
+        );
 
-        if (!empty($filename) && is_dir($filename)) {
-            $output->writeln("Importing translations from <info>$filename</info>...");
-            $finder = new Finder();
-            $finder->files()->in($filename)->name('*');
+        if ( ! $filesCount) {
+            $this->output->writeln("<error>No files found.</error>");
 
-            foreach ($finder as $file) {
-                $output->writeln("Found <info>".$file->getRealpath()."</info>...");
-                $files[] = $file->getRealpath();
-            }
-
-        } else {
-            $dir = $this->getContainer()->getParameter('kernel.root_dir').'/../src';
-
-            $output->writeln("Scanning ".$dir."...");
-            $finder = new Finder();
-            $finder->directories()->in($dir)->name('translations');
-
-            foreach ($finder as $dir) {
-                $finder2 = new Finder();
-                $finder2->files()->in($dir->getRealpath())->name('*');
-                foreach ($finder2 as $file) {
-                    $output->writeln("Found <info>".$file->getRealpath()."</info>...");
-                    $files[] = $file->getRealpath();
-                }
-            }
-        }
-
-        if (!count($files)) {
-            $output->writeln("<error>No files found.</error>");
             return;
         }
-        $output->writeln(sprintf("Found %d files, importing...", count($files)));
-        
-        foreach($files as $filename) {
-            $this->import($filename);
+
+        $this->output->writeln(sprintf("Found %d files, importing...", $filesCount));
+
+        foreach ($domains as $domain) {
+            $this->importDomain($domain);
         }
 
     }
 
-    public function import($domain, $filename)
+    /**
+     * Retrieve the list of registered domains.
+     *
+     * @param \Symfony\Component\HttpKernel\Kernel $kernel
+     *
+     * @return array
+     */
+    protected function getDomainList($kernel)
     {
-        $this->output->writeln("Processing <info>".$filename."</info>...");
-        
-        list($name, $language, $country, $type) = $this->extractNameLocaleType($filename);
-        
-        $locale = $this->getLocale($language, $country);
-        
-        switch($type) {
-            case 'xliff':
-                $this->importXliff($domain, $filename, $name, $locale);
-                break;
+        $srcRootDirectory = realpath($kernel->getRootDir() . '/../src');
+        $domains          = array();
+
+        $bundles = array_filter(
+            $kernelService->getBundles(),
+            function ($bundle) use ($srcRootDirectory) {
+                return (strpos($bundle->getPath(), $srcRootDirectory) === 0);
+            }
+        );
+
+        foreach ($bundles as $bundle) {
+            $domains[] = array(
+                'name'  => $bundle->getName(),
+                'path'  => $bundle->getPath(),
+                'files' => $this->getTranslationFileList($bundle)
+            );
+        }
+
+        return $domains;
+    }
+
+    /**
+     * Retrieve the list of translation files of a given Bundle
+     *
+     * @param \Symfony\Component\HttpKernel\Bundle\Bundle $bundle
+     *
+     * @return array
+     */
+    protected function getTranslationFileList($bundle)
+    {
+        $translationPath = $bundle->getPath() . '/Resources/translations';
+        $translationFiles = array();
+
+        if ( ! file_exists($translationPath)) {
+            return $translationFiles;
+        }
+
+        $finder = new Finder();
+        $finder->files()->in($translationPath)->name('*');
+
+        foreach ($finder as $translationFile) {
+            $this->output->writeln(sprintf('Found <info>%s</info>...', $translationFile->getRealpath()));
+
+            list($name, $language, $country, $type) = $this->extractNameLocaleType($translationFile);
+
+            $translationFiles[] = array(
+                'path'     => $translationFile->getRealPath(),
+                'name'     => $name,
+                'language' => $language,
+                'country'  => $country,
+                'type'     => $type
+            );
+        }
+
+        return $translationFiles;
+    }
+
+    /**
+     * Import translation files of a given domain.
+     *
+     * @param array $domain
+     */
+    protected function importDomain($domain)
+    {
+        foreach ($domain['files'] as $translationFile) {
+            $this->output->writeln(sprintf('Processing <info>%s</info>...', $translationFile['path']));
+
+            $locale = $this->getOrCreateLocale($translationFile['language'], $translationFile['country']);
+
+            $this->importFile($domain, $translationFile, $locale);
         }
     }
-    
+
+    /**
+     * Import a specific domain locale translation file
+     *
+     * @param array $domain
+     * @param array $translationFile
+     * @param \ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface $locale
+     */
+    protected function importFile($domain, $translationFile, $locale)
+    {
+
+    }
+
     /**
      * @return \ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface
      */
-    protected function getLocale($language, $country)
+    protected function getOrCreateLocale($language, $country)
     {
-        // @TODO implement the service to get the locale. if we can't find one, create it.
+        $storageService = $this->getContainer()->get('server_grove_translation_editor.storage');
+
+        if (($locale = $storageService->findLocale($language, $country)) !== null) {
+            return $locale;
+        }
+
+        return $storageService->createLocale($language, $country);
     }
-    
+
+    /**
+     * Extract file information
+     *
+     * @param string $filename
+     *
+     * @return array
+     */
     protected function extractNameLocaleType($filename)
     {
         // Gather information for re-assembly.
-        list($name, $locale, $type) = explode('.', basename($fname));
+        list($name, $locale, $type) = explode('.', basename($filename));
         list($language, $country) = preg_split('/(-|_)/', $locale, 2);
-        
+
         // Fix the inconsistency in naming convention.
         $language  = strtolower($language);
         $country   = strtoupper($country);
         $type      = strtolower($type);
-        
+
         return array($name, $language, $country, $type);
     }
-    
+
     protected function importXliff($domain, $filename, $name, $locale)
     {
         $fileContent = file_get_contents($filename);
-        
+
         // Load all trans-unit blocks.
         $xliff = simplexml_load_file($fileContent);
         $units = $xliff->file->body->children();
-                
-        
+
+
         // Load the data from the storage service.
         $entries = $this->getContainer()
            ->get('server_grove_translation_editor.storage')
            ->getEntryList(array('locale'=>$locale));
-        
+
         $this->output->writeln(sprintf('  Found entries: %d', count($entries)));
-        
+
         // Create an entry if we don't have one.
         if ( ! $entries) {
             $creationInfo = array(
@@ -146,7 +219,7 @@ class ImportCommand extends Base
                 $this->updateTranslation(null, $unit, $creationInfo);
             }
         }
-        
+
         // Add or override the translation for all domains.
         foreach ($entries as $entry) {
             foreach ($units as $unit) {
@@ -154,10 +227,10 @@ class ImportCommand extends Base
             }
             // @TODO: find the way to persist the entry.
         }
-        
+
         // @TODO: flush the transaction.
     }
-    
+
     /**
      * Update or add the translation.
      *
@@ -169,29 +242,29 @@ class ImportCommand extends Base
     {
         $alias = (string) $unit->source;
         $value = (string) $unit->target;
-        
+
         if ( ! $entry) {
             $entry = null; // @TODO create Translation object.
             $entry->setDomain($creationInfo['domain']);
             $entry->setFileName($creationInfo['filename']);
             $entry->setAlias($alias);
         }
-        
+
         // If there exists a translation for this alias, override it.
         if ($entry->getTranslations()->containsValue($value)) {
             $entry->getTranslations()->set($alias, $value);
             return;
         }
-        
+
         // Otherwise, add this translation.
         $translation = null; // @TODO create Translation object.
         $translation->setEntry($entry);
         $translation->setValue($value);
         $translation->setLocale($creationInfo['locale']);
-        
+
         $entry->addTranslation($translation);
     }
-    
+
     /**
      * Import from a YAML file.
      *
@@ -202,11 +275,11 @@ class ImportCommand extends Base
     protected function importYaml($fileContent, $name, $locale)
     {
         throw \Exception('Code not updated');
-        
+
         $this->setMongoIndexes();
-        
+
         $type = 'yml';
-        
+
         $yaml = new Parser();
         $value = $yaml->parse($fileContent);
 
@@ -214,7 +287,7 @@ class ImportCommand extends Base
             ->get('server_grove_translation_editor.storage_manager')
             ->getCollection()
             ->findOne(array('filename'=>$name));
-        
+
         if (!$data) {
             $data = array(
                 'filename' => $name,

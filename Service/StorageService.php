@@ -30,6 +30,29 @@ class StorageService
     }
 
     /**
+     * Retrieve the list of registered Locales
+     *
+     * @param boolean $onlyActive
+     *
+     * @return array
+     */
+    public function getLocaleList($onlyActive = true)
+    {
+        return $this->storage->getLocaleList($onlyActive);
+    }
+
+    public function findLocale($language, $country)
+    {
+        $criteria = array(
+            'language' => $language,
+            'country'  => $country
+        );
+
+        return $this->storage->findLocale($criteria);
+    }
+
+    /**
+     * Retrieve the list of registered Entries
      *
      * @return array
      */

@@ -34,6 +34,36 @@ class ORMStorage extends AbstractStorage implements StorageInterface
     }
 
     /**
+     * Retrieve a single Locale based on search criteria
+     *
+     * @param array $criteria
+     *
+     * @return ServerGrove\Bundle\TranslationEditorBundle\Entity\Locale
+     */
+    public function findLocale(array $criteria = array())
+    {
+        $repository = $this->manager->getRepository(self::CLASS_LOCALE);
+        $builder    = $repository->createQueryBuilder('l');
+
+        $parameterIndex = 1;
+
+        foreach ($criteria as $fieldName => $fieldValue) {
+            $builder->andWhere(sprintf('l.%s = ?%d', $fieldName, $parameterIndex));
+            $builder->setParameter($parameterIndex, $fieldValue);
+
+            $parameterIndex++;
+        }
+
+        try {
+            return $builder->getQuery()->getOneOrNullResult();
+        } catch (\Doctrine\ORM\NonUniqueResultException $e) {
+            // Do nothing
+        }
+
+        return null;
+    }
+
+    /**
      * Retireve the Entry array
      *
      * @return array
