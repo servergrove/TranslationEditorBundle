@@ -8,10 +8,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Parser;
+use ServerGrove\Bundle\TranslationEditorBundle\Model\EntryInterface;
+use ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface;
 
-use ServerGrove\Entity\Entry;
-use ServerGrove\Entity\Locale;
-use ServerGrove\Entity\Translation;
 /**
  * Command for importing translation files
  *
@@ -83,46 +82,51 @@ class ImportCommand extends Base
 
     }
 
-    public function import($filename)
+    public function import($domain, $filename)
     {
         $this->output->writeln("Processing <info>".$filename."</info>...");
         
-        $fileContent = file_get_contents($filename);
+        list($name, $language, $country, $type) = $this->extractNameLocaleType($filename);
         
-        list($name, $locale, $type) = $this->extractNameLocaleType($filename);
+        $locale = $this->getLocale($language, $country);
         
         switch($type) {
-            case 'yml':
-            case 'yaml':
-                $this->importYaml($fileContent, $filename, $locale);
-                break;
             case 'xliff':
-                $this->importXliff($fileContent, $name, $locale);
+                $this->importXliff($domain, $filename, $name, $locale);
                 break;
         }
     }
     
-    protected function extractNameLocaleType($filename) {
+    /**
+     * @return \ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface
+     */
+    protected function getLocale($language, $country)
+    {
+        // @TODO implement the service to get the locale. if we can't find one, create it.
+    }
+    
+    protected function extractNameLocaleType($filename)
+    {
         // Gather information for re-assembly.
         list($name, $locale, $type) = explode('.', basename($fname));
-        list($language, $territory) = preg_split('/(-|_)/', $locale, 2);
+        list($language, $country) = preg_split('/(-|_)/', $locale, 2);
         
         // Fix the inconsistency in naming convention.
         $language  = strtolower($language);
-        $territory = strtoupper($territory);
+        $country   = strtoupper($country);
         $type      = strtolower($type);
         
-        // Re-assemble the locale ID.
-        $locale = sprintf('%s-%s', $language, $territory);
-        
-        return array($name, $locale, $type);
+        return array($name, $language, $country, $type);
     }
     
-    protected function importXliff($fileContent, $name, $locale)
+    protected function importXliff($domain, $filename, $name, $locale)
     {
+        $fileContent = file_get_contents($filename);
+        
         // Load all trans-unit blocks.
         $xliff = simplexml_load_file($fileContent);
         $units = $xliff->file->body->children();
+                
         
         // Load the data from the storage service.
         $entries = $this->getContainer()
@@ -131,35 +135,61 @@ class ImportCommand extends Base
         
         $this->output->writeln(sprintf('  Found entries: %d', count($entries)));
         
-        // @TODO: what if there are no entries?
-        // @TODO: search for a target locale or create a new locale.
+        // Create an entry if we don't have one.
+        if ( ! $entries) {
+            $creationInfo = array(
+                'domain'   => $domain,
+                'filename' => $filename,
+                'locale'   => $locale
+            );
+            foreach ($units as $unit) {
+                $this->updateTranslation(null, $unit, $creationInfo);
+            }
+        }
         
         // Add or override the translation for all domains.
         foreach ($entries as $entry) {
-            $currentDomain = $entry->getDomain();
-            
             foreach ($units as $unit) {
-                $alias = (string) $unit->source;
-                $value = (string) $unit->target;
-                
-                // If there exists a translation for this alias, override it.
-                if ($entry->getTranslations()->containsKey($alias)) {
-                    $entry->getTranslations()->set($alias, $value);
-                    continue;
-                }
-                
-                // Otherwise, add this translation.
-                $translation = new Translation();
-                $translation->setEntry($entry);
-                $translation->setValue($value);
-                // @TODO: set the locale.
-                
-                $entry->addTranslation($translation);
+                $this->updateTranslation($entry, $unit);
             }
             // @TODO: find the way to persist the entry.
         }
         
         // @TODO: flush the transaction.
+    }
+    
+    /**
+     * Update or add the translation.
+     *
+     * @param \ServerGrove\Bundle\TranslationEditorBundle\Model\EntryInterface|null $entry
+     * @param \SimpleXMLElement $unit
+     * @param array $creationInfo
+     */
+    protected function updateTranslation($entry, \SimpleXMLElement $unit, $creationInfo=null)
+    {
+        $alias = (string) $unit->source;
+        $value = (string) $unit->target;
+        
+        if ( ! $entry) {
+            $entry = null; // @TODO create Translation object.
+            $entry->setDomain($creationInfo['domain']);
+            $entry->setFileName($creationInfo['filename']);
+            $entry->setAlias($alias);
+        }
+        
+        // If there exists a translation for this alias, override it.
+        if ($entry->getTranslations()->containsValue($value)) {
+            $entry->getTranslations()->set($alias, $value);
+            return;
+        }
+        
+        // Otherwise, add this translation.
+        $translation = null; // @TODO create Translation object.
+        $translation->setEntry($entry);
+        $translation->setValue($value);
+        $translation->setLocale($creationInfo['locale']);
+        
+        $entry->addTranslation($translation);
     }
     
     /**
