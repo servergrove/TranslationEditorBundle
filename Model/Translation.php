@@ -52,7 +52,7 @@ abstract class Translation implements TranslationInterface
     /**
      * {{@inheritdoc}}
      */
-    public function setEntry(Entry $entry)
+    public function setEntry(EntryInterface $entry)
     {
         $entry->addTranslation($this);
 
@@ -70,10 +70,26 @@ abstract class Translation implements TranslationInterface
     /**
      * {{@inheritdoc}}
      */
-    public function setLocale(Locale $locale)
+    public function setLocale(LocaleInterface $locale)
     {
         $locale->addTranslation($this);
 
         $this->locale = $locale;
+    }
+
+    /**
+     * {{@inheritdoc}}
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
+
+    /**
+     * {{@inheritdoc}}
+     */
+    public function setValue($value)
+    {
+        $this->value = $value;
     }
 }

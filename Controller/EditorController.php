@@ -13,27 +13,28 @@ class EditorController extends Controller
 
     public function listAction()
     {
+        $storageService = $this->container->get('server_grove_translation_editor.storage');
+        $defaultLocale  = $this->container->getParameter('locale', 'en');
+
+        $locales = $storageService->getLocaleList();
+        $data    = $storageService->getEntryList();
+
         echo '<pre>';
-        \Doctrine\Common\Util\Debug::dump($this->container->get('server_grove_translation_editor.storage'));
+        \Doctrine\Common\Util\Debug::dump($locales);
         echo '</pre>';
         die;
 
-        $data = $this->getCollection()->find();
-
-        $data->sort(array('locale' => 1));
-
         $locales = array();
-
-        $default = $this->container->getParameter('locale', 'en');
         $missing = array();
 
         foreach ($data as $d) {
-            if (!isset($locales[$d['locale']])) {
+            if ( ! isset($locales[$d['locale']])) {
                 $locales[$d['locale']] = array(
                     'entries' => array(),
                     'data'    => array()
                 );
             }
+
             if (is_array($d['entries'])) {
                 $locales[$d['locale']]['entries'] = array_merge($locales[$d['locale']]['entries'], $d['entries']);
                 $locales[$d['locale']]['data'][$d['filename']] = $d;
@@ -54,7 +55,7 @@ class EditorController extends Controller
 
         return $this->render('ServerGroveTranslationEditorBundle:Editor:list.html.twig', array(
                 'locales' => $locales,
-                'default' => $default,
+                'default' => $defaultLocale,
                 'missing' => $missing,
             )
         );

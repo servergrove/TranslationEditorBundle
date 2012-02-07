@@ -106,7 +106,7 @@ abstract class Entry implements EntryInterface
     /**
      * {{@inheritdoc}}
      */
-    public function addTranslation(Translation $translation)
+    public function addTranslation(TranslationInterface $translation)
     {
         if ( ! $translation->getEntry() instanceof self) {
             $this->translations[] = $translation;

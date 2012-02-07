@@ -54,9 +54,9 @@ interface EntryInterface
     /**
      * Append an Entry translation
      *
-     * @param Translation $translation
+     * @param TranslationInterface $translation
      */
-    public function addTranslation(Translation $translation);
+    public function addTranslation(TranslationInterface $translation);
 
     /**
      * Retrieve the Entry translations

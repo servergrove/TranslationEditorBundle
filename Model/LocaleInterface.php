@@ -54,9 +54,9 @@ interface LocaleInterface
     /**
      * Append a Locale translation
      *
-     * @param Translation $translation
+     * @param TranslationInterface $translation
      */
-    public function addTranslation(Translation $translation);
+    public function addTranslation(TranslationInterface $translation);
 
     /**
      * Retrieve the Locale translations

@@ -14,15 +14,15 @@ abstract class AbstractStorage
     /**
      * @var \Doctrine\Common\Persistence\ObjectManager
      */
-    protected $objectManager;
+    protected $manager;
 
     /**
      * Constructor
      *
-     * @param \Doctrine\Common\Persistence\ObjectManager $objectManager
+     * @param \Doctrine\Common\Persistence\ObjectManager $manager
      */
-    public function __construct(ObjectManager $objectManager)
+    public function __construct(ObjectManager $manager)
     {
-        $this->objectManager = $objectManager;
+        $this->manager = $manager;
     }
 }

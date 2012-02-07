@@ -17,23 +17,23 @@
                column="value"
                type="string"/>
 
-        <one-to-many target-entity="ServerGrove\Bundle\TranslationEditorBundle\Entity\Entry"
-                     mapped-by="entry"
-                     field="entry">
+        <many-to-one target-entity="ServerGrove\Bundle\TranslationEditorBundle\Entity\Entry"
+                     field="entry"
+                     inversed-by="translations">
             <cascade>
                 <cascade-persist/>
                 <cascade-refresh/>
             </cascade>
-        </one-to-many>
+        </many-to-one>
 
-        <one-to-many target-entity="ServerGrove\Bundle\TranslationEditorBundle\Entity\Locale"
-                     mapped-by="locale"
-                     field="locale">
+        <many-to-one target-entity="ServerGrove\Bundle\TranslationEditorBundle\Entity\Locale"
+                     field="locale"
+                     inversed-by="translations">
             <cascade>
                 <cascade-persist/>
                 <cascade-refresh/>
             </cascade>
-        </one-to-many>
+        </many-to-one>
 
     </entity>
 

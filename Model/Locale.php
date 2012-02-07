@@ -107,7 +107,7 @@ abstract class Locale implements LocaleInterface
     /**
      * {{@inheritdoc}}
      */
-    public function addTranslation(Translation $translation)
+    public function addTranslation(TranslationInterface $translation)
     {
         if ( ! $translation->getLocale() instanceof self) {
             $this->translations[] = $translation;

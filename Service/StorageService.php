@@ -29,8 +29,12 @@ class StorageService
         $this->storage = $storage;
     }
 
-    public function getTranslations()
+    /**
+     *
+     * @return array
+     */
+    public function getEntryList()
     {
-        return $this->storage->getTranslations();
+        return $this->storage->getEntryList();
     }
 }
