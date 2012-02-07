@@ -84,14 +84,14 @@ class ExportCommand extends Base
 
         list($name, $locale, $type) = explode('.', $fname);
 
+        $data = $this->getContainer()->get('server_grove_translation_editor.storage_manager')->getCollection()->findOne(array('filename'=>$filename));
+        if (!$data) {
+            $this->output->writeln("Could not find data for this locale");
+            return;
+        }
+
         switch($type) {
             case 'yml':
-                $data = $this->getContainer()->get('server_grove_translation_editor.storage_manager')->getCollection()->findOne(array('filename'=>$filename));
-                if (!$data) {
-                    $this->output->writeln("Could not find data for this locale");
-                    return;
-                }
-
                 foreach($data['entries'] as $key => $val) {
                     if (empty($val)) {
                         unset($data['entries'][$key]);
@@ -101,16 +101,37 @@ class ExportCommand extends Base
                 $dumper = new Dumper();
                 $result = $dumper->dump($data['entries'], 1);
 
-                $this->output->writeln("  Writing ".count($data['entries'])." entries to $filename");
-                if (!$this->input->getOption('dry-run')) {
-                    file_put_contents($filename, $result);
-                }
-
                 break;
             case 'xliff':
-                $this->output->writeln("  Skipping, not implemented");
+                $xml = new \SimpleXMLElement('<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2"></xliff>');
+
+            	$xliff_file = $xml->addChild("file");
+            	$xliff_file->addAttribute("source-language", $locale);
+            	$xliff_file->addAttribute("datatype", "plaintext");
+            	$xliff_file->addAttribute("original", "file.ext");
+
+            	$body = $xliff_file->addChild('body');
+
+            	$i = 1;
+            	foreach($data['entries'] as $source => $target) {
+            		if (empty($target)) {
+            			continue;
+            		}
+
+            		$unit = $body->addChild('trans-unit');
+            		$unit->addAttribute("id", ++$i);
+            		$unit->addChild("source", $source);
+            		$unit->addChild("target", $target);
+            	}
+
+            	$xml = html_entity_decode($xml->asXML(), ENT_NOQUOTES, 'UTF-8');
                 break;
         }
+
+        $this->output->writeln("  Writing ".count($data['entries'])." entries to $filename");
+        if (!$this->input->getOption('dry-run')) {
+    		file_put_contents($filename, $xml);
+    	}
     }
 
 
