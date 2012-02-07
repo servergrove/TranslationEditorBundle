@@ -71,7 +71,7 @@ class ExportCommand extends Base
         }
         $output->writeln(sprintf("Found %d files, exporting...", count($files)));
         
-        foreach($files as $filename) {
+        foreach ($files as $filename) {
             $this->export($filename);
         }
 
@@ -92,7 +92,7 @@ class ExportCommand extends Base
 
         switch($type) {
             case 'yml':
-                foreach($data['entries'] as $key => $val) {
+                foreach ($data['entries'] as $key => $val) {
                     if (empty($val)) {
                         unset($data['entries'][$key]);
                     }
@@ -113,7 +113,7 @@ class ExportCommand extends Base
             	$body = $xliff_file->addChild('body');
 
             	$i = 1;
-            	foreach($data['entries'] as $source => $target) {
+            	foreach ($data['entries'] as $source => $target) {
             		if (empty($target)) {
             			continue;
             		}
