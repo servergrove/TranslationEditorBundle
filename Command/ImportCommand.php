@@ -9,7 +9,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Parser;
 
-use ServerGrove\Entity\Entry as TranslationPackage;
+use ServerGrove\Entity\Entry;
+use ServerGrove\Entity\Locale;
+use ServerGrove\Entity\Translation;
 /**
  * Command for importing translation files
  *
@@ -84,16 +86,18 @@ class ImportCommand extends Base
     public function import($filename)
     {
         $this->output->writeln("Processing <info>".$filename."</info>...");
-
+        
+        $fileContent = file_get_contents($filename);
+        
         list($name, $locale, $type) = $this->extractNameLocaleType($filename);
         
         switch($type) {
             case 'yml':
             case 'yaml':
-                $this->importYaml($filename, $name, $locale);
+                $this->importYaml($fileContent, $filename, $locale);
                 break;
             case 'xliff':
-                $this->importXml($filename, $name, $locale);
+                $this->importXliff($fileContent, $name, $locale);
                 break;
         }
     }
@@ -114,24 +118,48 @@ class ImportCommand extends Base
         return array($name, $locale, $type);
     }
     
-    protected function importXml($filename, $name, $locale)
+    protected function importXliff($fileContent, $name, $locale)
     {
-        $xml = simplexml_load_file(file_get_contents($filename));
+        // Load all trans-unit blocks.
+        $xliff = simplexml_load_file($fileContent);
+        $units = $xliff->file->body->children();
         
         // Load the data from the storage service.
         $entries = $this->getContainer()
            ->get('server_grove_translation_editor.storage')
-           ->getEntries(array('locale'=>$locale));
+           ->getEntryList(array('locale'=>$locale));
         
         $this->output->writeln(sprintf('  Found entries: %d', count($entries)));
         
-        if ( ! $entries) {
-            $entries = TranslationPackage();
-        }
-        foreach ($entries->getTranslations() as $translation) {
-            $translation;
+        // @TODO: what if there are no entries?
+        // @TODO: search for a target locale or create a new locale.
+        
+        // Add or override the translation for all domains.
+        foreach ($entries as $entry) {
+            $currentDomain = $entry->getDomain();
+            
+            foreach ($units as $unit) {
+                $alias = (string) $unit->source;
+                $value = (string) $unit->target;
+                
+                // If there exists a translation for this alias, override it.
+                if ($entry->getTranslations()->containsKey($alias)) {
+                    $entry->getTranslations()->set($alias, $value);
+                    continue;
+                }
+                
+                // Otherwise, add this translation.
+                $translation = new Translation();
+                $translation->setEntry($entry);
+                $translation->setValue($value);
+                // @TODO: set the locale.
+                
+                $entry->addTranslation($translation);
+            }
+            // @TODO: find the way to persist the entry.
         }
         
+        // @TODO: flush the transaction.
     }
     
     /**
@@ -141,7 +169,7 @@ class ImportCommand extends Base
      * @param string $name
      * @param string $locale
      */
-    protected function importYaml($filename, $name, $locale)
+    protected function importYaml($fileContent, $name, $locale)
     {
         throw \Exception('Code not updated');
         
@@ -150,16 +178,16 @@ class ImportCommand extends Base
         $type = 'yml';
         
         $yaml = new Parser();
-        $value = $yaml->parse(file_get_contents($filename));
+        $value = $yaml->parse($fileContent);
 
         $data = $this->getContainer()
             ->get('server_grove_translation_editor.storage_manager')
             ->getCollection()
-            ->findOne(array('filename'=>$filename));
+            ->findOne(array('filename'=>$name));
         
         if (!$data) {
             $data = array(
-                'filename' => $filename,
+                'filename' => $name,
                 'locale' => $locale,
                 'type' => $type,
                 'entries' => array(),
