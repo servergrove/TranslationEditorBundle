@@ -14,77 +14,40 @@ class ORMStorage extends AbstractStorage implements StorageInterface
     const CLASS_TRANSLATION = 'ServerGrove\Bundle\TranslationEditorBundle\Entity\Translation';
 
     /**
-     * Retrieve the Locale array
-     *
-     * @param boolean $onlyActive Optional (default=true)
-     *
-     * @return array
+     * {{@inheritdoc}}
      */
-    public function getLocaleList($onlyActive = true)
+    public function findLocaleList(array $criteria = array())
     {
         $repository = $this->manager->getRepository(self::CLASS_LOCALE);
         $builder    = $repository->createQueryBuilder('l');
 
-        if ($onlyActive) {
-            $builder->where('l.active = ?1');
-            $builder->setParameter(1, true);
-        }
+        $this->hydrateCriteria($builder, $criteria);
 
         return $builder->getQuery()->getResult();
     }
 
     /**
-     * Retrieve a single Locale based on search criteria
-     *
-     * @param array $criteria
-     *
-     * @return ServerGrove\Bundle\TranslationEditorBundle\Entity\Locale
+     * {{@inheritdoc}}
      */
-    public function findLocale(array $criteria = array())
+    public function createLocale($language, $country = null)
     {
-        $repository = $this->manager->getRepository(self::CLASS_LOCALE);
-        $builder    = $repository->createQueryBuilder('l');
+        $localeClass = self::CLASS_LOCALE;
+        $locale      = new $localeClass;
 
-        $parameterIndex = 1;
-
-        foreach ($criteria as $fieldName => $fieldValue) {
-            $builder->andWhere(sprintf('l.%s = ?%d', $fieldName, $parameterIndex));
-            $builder->setParameter($parameterIndex, $fieldValue);
-
-            $parameterIndex++;
-        }
-
-        try {
-            return $builder->getQuery()->getOneOrNullResult();
-        } catch (\Doctrine\ORM\NonUniqueResultException $e) {
-            // Do nothing
-        }
-
-        return null;
-    }
-    
-    /**
-     * Create a new Locale.
-     *
-     * @param string $language
-     * @param string $country
-     */
-    public function createLocale($language, $country)
-    {
-        $locale = new \ServerGrove\Bundle\TranslationEditorBundle\Entity\Locale();
-        
         $locale->setLanguage($language);
         $locale->setCountry($country);
-        
+        $locale->setActive(true);
+
+        $this->manager->persist($locale);
+        $this->manager->flush();
+
         return $locale;
     }
 
     /**
-     * Retireve the Entry array
-     *
-     * @return array
+     * {{@inheritdoc}}
      */
-    public function getEntryList()
+    public function findEntryList(array $criteria = array())
     {
         $repository = $this->manager->getRepository(self::CLASS_ENTRY);
         $builder    = $repository->createQueryBuilder('e');
@@ -92,6 +55,66 @@ class ORMStorage extends AbstractStorage implements StorageInterface
         $builder->leftJoin('e.translations', 't')
                 ->leftJoin('t.locale', 'l');
 
+        $this->hydrateCriteria($builder, $criteria);
+
         return $builder->getQuery()->getResult();
+    }
+
+    /**
+     * {{@inheritdoc}}
+     */
+    public function createEntry($domain, $fileName, $alias)
+    {
+        $entryClass = self::CLASS_ENTRY;
+        $entry      = new $entryClass;
+
+        $entry->setDomain($domain);
+        $entry->setFileName($fileName);
+        $entry->setAlias($alias);
+
+        $this->manager->persist($entry);
+        $this->manager->flush();
+
+        return $entry;
+    }
+
+    /**
+     * {{@inheritdoc}}
+     */
+    public function createTranslation($locale, $entry, $value)
+    {
+        $translationClass = self::CLASS_TRANSLATION;
+        $translation      = new $translationClass;
+
+        $translation->setLocale($locale);
+        $translation->setEntry($entry);
+        $translation->setValue($value);
+
+        $this->manager->persist($translation);
+        $this->manager->flush();
+
+        return $translation;
+    }
+
+    protected function hydrateCriteria($builder, array $criteria = array())
+    {
+        $parameterIndex = 1;
+
+        foreach ($criteria as $fieldName => $fieldValue) {
+            $fieldName = sprintf('%s.%s', $builder->getRootAlias(), $fieldName);
+
+            switch ($fieldValue) {
+                case null:
+                    $builder->andWhere(sprintf('%s IS NULL', $fieldName));
+                    break;
+
+                default:
+                    $builder->andWhere(sprintf('%s = ?%d', $fieldName, $parameterIndex));
+                    $builder->setParameter($parameterIndex, $fieldValue);
+
+                    $parameterIndex++;
+                    break;
+            }
+        }
     }
 }

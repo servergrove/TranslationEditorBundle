@@ -18,11 +18,10 @@ class ServerGroveTranslationEditorExtension extends \Symfony\Component\HttpKerne
 
         $loader->load('services.xml');
 
-        $configuration   = new Configuration();
-        $config          = $this->processConfiguration($configuration, $configs);
-        $parameterDomain = 'server_grove_translation_editor';
+        $configuration = new Configuration();
+        $config        = $this->processConfiguration($configuration, $configs);
 
-        $container->setParameter($parameterDomain . '.storage.type', $config['storage']['type']);
-        $container->setParameter($parameterDomain . '.storage.manager', $config['storage']['manager']);
+        $container->setParameter($this->getAlias() . '.storage.type', $config['storage']['type']);
+        $container->setParameter($this->getAlias() . '.storage.manager', $config['storage']['manager']);
     }
 }

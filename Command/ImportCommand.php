@@ -10,6 +10,7 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Parser;
 use ServerGrove\Bundle\TranslationEditorBundle\Model\EntryInterface;
 use ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Command for importing translation files
@@ -146,6 +147,24 @@ class ImportCommand extends Base
     }
 
     /**
+     * Get an existed locale or create and return a new locale.
+     *
+     * @return \ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface
+     */
+    protected function getOrCreateLocale($language, $country)
+    {
+        $storageService = $this->getContainer()->get('server_grove_translation_editor.storage');
+        $localeList     = $storageService->findLocaleList(array(
+            'language' => $language,
+            'country'  => $country
+        ));
+
+        return (count($localeList) === 1)
+            ? reset($localeList)
+            : $storageService->createLocale($language, $country);
+    }
+
+    /**
      * Import a specific domain locale translation file
      *
      * @param array $domain
@@ -154,23 +173,54 @@ class ImportCommand extends Base
      */
     protected function importFile($domain, $translationFile, $locale)
     {
+        $xliff        = simplexml_load_file($translationFile['path']);
+        $xliffEntries = $xliff->file->body->children();
+
+        $storageService = $this->getContainer()->get('server_grove_translation_editor.storage');
+        $entries        =  $storageService->findEntryList(array(
+            'domain'   => $domain['name'],
+            'fileName' => $translationFile['name']
+        ));
+
+        foreach ($xliffEntries as $xliffEntry) {
+            $entry = $this->getOrCreateEntry(
+                (string) $xliffEntry->source,
+                $domain['name'],
+                $translationFile['name'],
+                $entries
+            );
+
+            $translations = $entry->getTranslations()->filter(
+                function ($translation) use ($locale) {
+                    return ($translation->getLocale() === $locale);
+                }
+            );
+
+            if ( ! count($translations)) {
+                $storageService->createTranslation($locale, $entry, (string) $xliffEntry->target);
+            }
+        }
 
     }
 
     /**
-     * Get an existed locale or create and return a new locale.
-     * 
-     * @return \ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface
+     * Get an existed entry or create and return a new entry.
+     *
+     * @return \ServerGrove\Bundle\TranslationEditorBundle\Model\EntryInterface
      */
-    protected function getOrCreateLocale($language, $country)
+    protected function getOrCreateEntry($alias, $domain, $fileName, $entries)
     {
-        $storageService = $this->getContainer()->get('server_grove_translation_editor.storage');
+        $storageService  = $this->getContainer()->get('server_grove_translation_editor.storage');
+        $entryCollection = array_filter(
+            $entries,
+            function ($entry) use ($alias) {
+                return ($alias === $entry->getAlias());
+            }
+        );
 
-        if (($locale = $storageService->findLocale($language, $country)) !== null) {
-            return $locale;
-        }
-
-        return $storageService->createLocale($language, $country);
+        return (count($entryCollection) > 0)
+            ? array_shift($entryCollection)
+            : $storageService->createEntry($domain, $fileName, $alias);
     }
 
     /**
@@ -184,151 +234,14 @@ class ImportCommand extends Base
     {
         // Gather information for re-assembly.
         list($name, $locale, $type) = explode('.', basename($filename));
-        list($language, $country) = preg_split('/(-|_)/', $locale, 2);
+
+        $localeParts = preg_split('/(-|_)/', $locale, 2);
 
         // Fix the inconsistency in naming convention.
-        $language  = strtolower($language);
-        $country   = strtoupper($country);
-        $type      = strtolower($type);
+        $language = strtolower($localeParts[0]);
+        $country  = (isset($localeParts[1])) ? strtoupper($localeParts[1]) : null;
+        $type     = strtolower($type);
 
         return array($name, $language, $country, $type);
     }
-
-    protected function importXliff($domain, $filename, $name, $locale)
-    {
-        $fileContent = file_get_contents($filename);
-
-        // Load all trans-unit blocks.
-        $xliff = simplexml_load_file($fileContent);
-        $units = $xliff->file->body->children();
-
-
-        // Load the data from the storage service.
-        $entries = $this->getContainer()
-           ->get('server_grove_translation_editor.storage')
-           ->getEntryList(array('locale'=>$locale));
-
-        $this->output->writeln(sprintf('  Found entries: %d', count($entries)));
-
-        // Create an entry if we don't have one.
-        if ( ! $entries) {
-            $creationInfo = array(
-                'domain'   => $domain,
-                'filename' => $filename,
-                'locale'   => $locale
-            );
-            foreach ($units as $unit) {
-                $this->updateTranslation(null, $unit, $creationInfo);
-            }
-        }
-
-        // Add or override the translation for all domains.
-        foreach ($entries as $entry) {
-            foreach ($units as $unit) {
-                $this->updateTranslation($entry, $unit);
-            }
-            // @TODO: find the way to persist the entry.
-        }
-
-        // @TODO: flush the transaction.
-    }
-
-    /**
-     * Update or add the translation.
-     *
-     * @param \ServerGrove\Bundle\TranslationEditorBundle\Model\EntryInterface|null $entry
-     * @param \SimpleXMLElement $unit
-     * @param array $creationInfo
-     */
-    protected function updateTranslation($entry, \SimpleXMLElement $unit, $creationInfo=null)
-    {
-        $alias = (string) $unit->source;
-        $value = (string) $unit->target;
-
-        if ( ! $entry) {
-            $entry = null; // @TODO create Translation object.
-            $entry->setDomain($creationInfo['domain']);
-            $entry->setFileName($creationInfo['filename']);
-            $entry->setAlias($alias);
-        }
-
-        // If there exists a translation for this alias, override it.
-        if ($entry->getTranslations()->containsValue($value)) {
-            $entry->getTranslations()->set($alias, $value);
-            return;
-        }
-
-        // Otherwise, add this translation.
-        $translation = null; // @TODO create Translation object.
-        $translation->setEntry($entry);
-        $translation->setValue($value);
-        $translation->setLocale($creationInfo['locale']);
-
-        $entry->addTranslation($translation);
-    }
-
-    /**
-     * Import from a YAML file.
-     *
-     * @param string $filename
-     * @param string $name
-     * @param string $locale
-     */
-    protected function importYaml($fileContent, $name, $locale)
-    {
-        throw \Exception('Code not updated');
-
-        $this->setMongoIndexes();
-
-        $type = 'yml';
-
-        $yaml = new Parser();
-        $value = $yaml->parse($fileContent);
-
-        $data = $this->getContainer()
-            ->get('server_grove_translation_editor.storage_manager')
-            ->getCollection()
-            ->findOne(array('filename'=>$name));
-
-        if (!$data) {
-            $data = array(
-                'filename' => $name,
-                'locale' => $locale,
-                'type' => $type,
-                'entries' => array(),
-            );
-
-        }
-
-        $this->output->writeln("  Found ".count($value)." entries...");
-        $data['entries'] = $value;
-
-        if (!$this->input->getOption('dry-run')) {
-            $this->updateValue($data);
-        }
-    }
-
-    protected function setMongoIndexes()
-    {
-        $collection = $this->getContainer()->get('server_grove_translation_editor.storage_manager')->getCollection();
-        $collection->ensureIndex( array( "filename" => 1, 'locale' => 1 ) );
-    }
-
-    protected function updateValue($data)
-    {
-        $collection = $collection = $this->getContainer()->get('server_grove_translation_editor.storage_manager')->getCollection();
-
-        $criteria = array(
-            'filename' => $data['filename'],
-        );
-
-        $mdata = array(
-            '$set' => $data,
-        );
-
-        return $collection->update($criteria, $data, array('upsert' => true));
-    }
-
 }
-
-
