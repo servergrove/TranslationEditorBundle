@@ -120,4 +120,22 @@ abstract class Entry implements EntryInterface
     {
         return $this->translations;
     }
+
+    /**
+     * Retrieve a Translation of a given Locale
+     *
+     * @param Locale $locale
+     *
+     * @return Translation
+     */
+    public function getTranslation($locale)
+    {
+        foreach ($this->getTranslations() as $translation) {
+            if ($translation->getLocale() === $locale) {
+                return $translation;
+            }
+        }
+
+        return null;
+    }
 }

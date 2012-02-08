@@ -121,4 +121,57 @@ abstract class Locale implements LocaleInterface
     {
         return $this->translations;
     }
+
+    /**
+     * Retrieve a Translation of a given Entry
+     *
+     * @param Locale $locale
+     *
+     * @return Translation
+     */
+    public function getTranslation($entry)
+    {
+        foreach ($this->getTranslations() as $translation) {
+            if ($translation->getEntry() === $entry) {
+                return $translation;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if a given locale equals to this Locale instance.
+     * Accepts either a string or a Locale instance for comparison.
+     *
+     * @param mixed $locale
+     *
+     * @return boolean
+     */
+    public function equalsTo($locale)
+    {
+        if ($locale instanceof self) {
+            return ($this === $locale);
+        }
+
+        $locale = str_replace('-', '_', $locale);
+
+        return ((string) $this === $locale);
+    }
+
+    /**
+     * Convert Locale to string
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        $locale = $this->getLanguage();
+
+        if (($country = $this->getCountry()) !== null) {
+            $locale .= '_' . $country;
+        }
+
+        return $locale;
+    }
 }

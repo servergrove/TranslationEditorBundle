@@ -38,10 +38,7 @@ class ORMStorage extends AbstractStorage implements StorageInterface
         $locale->setCountry($country);
         $locale->setActive(true);
 
-        $this->manager->persist($locale);
-        $this->manager->flush();
-
-        return $locale;
+        return $this->persist($locale);
     }
 
     /**
@@ -72,10 +69,41 @@ class ORMStorage extends AbstractStorage implements StorageInterface
         $entry->setFileName($fileName);
         $entry->setAlias($alias);
 
-        $this->manager->persist($entry);
-        $this->manager->flush();
+        return $this->persist($entry);
+    }
 
-        return $entry;
+    /**
+     * {{@inheritdoc}}
+     */
+    public function deleteEntry($id)
+    {
+        try {
+            $entryProxy = $this->manager->getReference(self::CLASS_ENTRY, $id);
+
+            $this->manager->remove($entryProxy);
+            $this->manager->flush();
+
+            return true;
+        } catch (\Exception $e) {
+            return $e->getMessage();
+
+            // Do nothing
+        }
+
+        return false;
+    }
+
+    /**
+     * {{@inheritdoc}}
+     */
+    public function findTranslationList(array $criteria = array())
+    {
+        $repository = $this->manager->getRepository(self::CLASS_TRANSLATION);
+        $builder    = $repository->createQueryBuilder('t');
+
+        $this->hydrateCriteria($builder, $criteria);
+
+        return $builder->getQuery()->getResult();
     }
 
     /**
@@ -90,10 +118,15 @@ class ORMStorage extends AbstractStorage implements StorageInterface
         $translation->setEntry($entry);
         $translation->setValue($value);
 
-        $this->manager->persist($translation);
+        return $this->persist($translation);
+    }
+
+    public function persist($entity)
+    {
+        $this->manager->persist($entity);
         $this->manager->flush();
 
-        return $translation;
+        return $entity;
     }
 
     protected function hydrateCriteria($builder, array $criteria = array())

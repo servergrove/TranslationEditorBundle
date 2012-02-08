@@ -1,66 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Symfony2 Translations Editor</title>
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <head>
+        <title>Symfony2 Translations Editor</title>
 
-    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
-    <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <meta charset="utf-8">
+        <meta name="description" content="">
+        <meta name="author" content="">
 
-    <!-- Le styles -->
-      <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css">
-    <style type="text/css">
-      body {
-        padding-top: 60px;
-      }
-    </style>
+        <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
 
-    <!-- Le fav and touch icons -->
-    <link rel="shortcut icon" href="images/favicon.ico">
-    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
-  </head>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 
-  <body>
-    <div class="topbar">
-      <div class="topbar-inner">
+        <!-- Le styles -->
+        <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css">
+
+        <style type="text/css">
+            body {
+                padding-top: 60px;
+            }
+        </style>
+
+        <!-- Le fav and touch icons -->
+        <link rel="shortcut icon" href="images/favicon.ico">
+        <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+        <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+    </head>
+
+    <body>
+        <div class="topbar">
+            <div class="topbar-inner">
+                <div class="container-fluid">
+                    <a class="brand" href="#">Symfony2 Translation Editor</a>
+
+                    <ul class="nav">
+                        <li><a href="#" onclick="$('.alert-message').hide();$('#newtranslation').show();$('#key').focus()">New Entry</a></li>
+                        <li><a href="#" onclick="this.innerHTML = 'Reloading...';window.location.reload()">Reload List</a></li>
+                        <li><a href="https://github.com/servergrove/TranslationEditorBundle">About</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <div class="container-fluid">
-          <a class="brand" href="#">Symfony2 Translation Editor</a>
-          <ul class="nav">
-            <li><a href="#" onclick="$('.alert-message').hide();$('#newtranslation').show();$('#key').focus()">New Entry</a></li>
-            <li><a href="#" onclick="this.innerHTML = 'Reloading...';window.location.reload()">Reload List</a></li>
-            <li><a href="https://github.com/servergrove/TranslationEditorBundle">About</a></li>
-          </ul>
+            <div class="sidebar">
+                <div class="well">
+                    <h5>Available Locales</h5>
+
+                    <ul>
+                        {% for locale in localeList %}
+                        <li>{{locale}} {% if locale == defaultLocale %}<span class="label">Default</span>{%endif%}</li>
+                        {% endfor %}
+                    </ul>
+
+                    {% block sidebar %}
+                    {% endblock %}
+                </div>
+            </div>
+
+            <div class="content">
+                {% block body %}
+                {% endblock %}
+            </div>
         </div>
-      </div>
-    </div>
 
-    <div class="container-fluid">
-      <div class="sidebar">
-        <div class="well">
-          <h5>Available Locales</h5>
-          <ul>
-              {% for locale, v in locales %}
-              <li>{{locale}} {% if locale == default %}<span class="label">Default</span>{%endif%}</li>
-              {%endfor%}
-          </ul>
-        {% block sidebar %}
-        {% endblock %}
-
-        </div>
-      </div>
-      <div class="content">
-          {% block body %}
-          {% endblock %}
-    </div>
-    </div>
-
-  </body>
+    </body>
 
 </html>

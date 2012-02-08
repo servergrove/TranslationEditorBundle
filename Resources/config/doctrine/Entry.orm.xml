@@ -30,7 +30,11 @@
         <one-to-many target-entity="ServerGrove\Bundle\TranslationEditorBundle\Entity\Translation"
                      field="translations"
                      mapped-by="entry"
-                     fetch="EXTRA_LAZY"/>
+                     fetch="EXTRA_LAZY">
+            <cascade>
+                <cascade-all/>
+            </cascade>
+        </one-to-many>
 
     </entity>
 
