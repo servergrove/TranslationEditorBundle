@@ -4,10 +4,6 @@ namespace ServerGrove\Bundle\TranslationEditorBundle\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Yaml\Parser;
 use ServerGrove\Bundle\TranslationEditorBundle\Model\EntryInterface;
 use ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -40,7 +36,7 @@ class ImportCommand extends Base
         $this->output->writeln('Scanning register bundles...');
 
         $kernel     = $this->getContainer()->get('kernel');
-        $domains    = $this->getDomainList($kernel);
+        $domains    = $this->getDomainList($kernel, true);
         $filesCount = array_sum(
             array_map(
                 function ($domain) {
@@ -65,72 +61,6 @@ class ImportCommand extends Base
     }
 
     /**
-     * Retrieve the list of registered domains.
-     *
-     * @param \Symfony\Component\HttpKernel\Kernel $kernel
-     *
-     * @return array
-     */
-    protected function getDomainList($kernel)
-    {
-        $srcRootDirectory = realpath($kernel->getRootDir() . '/../src');
-        $domains          = array();
-
-        $bundles = array_filter(
-            $kernel->getBundles(),
-            function ($bundle) use ($srcRootDirectory) {
-                return (strpos($bundle->getPath(), $srcRootDirectory) === 0);
-            }
-        );
-
-        foreach ($bundles as $bundle) {
-            $domains[] = array(
-                'name'  => $bundle->getName(),
-                'path'  => $bundle->getPath(),
-                'files' => $this->getTranslationFileList($bundle)
-            );
-        }
-
-        return $domains;
-    }
-
-    /**
-     * Retrieve the list of translation files of a given Bundle
-     *
-     * @param \Symfony\Component\HttpKernel\Bundle\Bundle $bundle
-     *
-     * @return array
-     */
-    protected function getTranslationFileList($bundle)
-    {
-        $translationPath = $bundle->getPath() . '/Resources/translations';
-        $translationFiles = array();
-
-        if ( ! file_exists($translationPath)) {
-            return $translationFiles;
-        }
-
-        $finder = new Finder();
-        $finder->files()->in($translationPath)->name('*');
-
-        foreach ($finder as $translationFile) {
-            $this->output->writeln(sprintf('Found <info>%s</info>...', $translationFile->getRealpath()));
-
-            list($name, $language, $country, $type) = $this->extractNameLocaleType($translationFile);
-
-            $translationFiles[] = array(
-                'path'     => $translationFile->getRealPath(),
-                'name'     => $name,
-                'language' => $language,
-                'country'  => $country,
-                'type'     => $type
-            );
-        }
-
-        return $translationFiles;
-    }
-
-    /**
      * Import translation files of a given domain.
      *
      * @param array $domain
@@ -144,24 +74,6 @@ class ImportCommand extends Base
 
             $this->importFile($domain, $translationFile, $locale);
         }
-    }
-
-    /**
-     * Get an existed locale or create and return a new locale.
-     *
-     * @return \ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface
-     */
-    protected function getOrCreateLocale($language, $country)
-    {
-        $storageService = $this->getContainer()->get('server_grove_translation_editor.storage');
-        $localeList     = $storageService->findLocaleList(array(
-            'language' => $language,
-            'country'  => $country
-        ));
-
-        return (count($localeList) === 1)
-            ? reset($localeList)
-            : $storageService->createLocale($language, $country);
     }
 
     /**
@@ -201,26 +113,6 @@ class ImportCommand extends Base
             }
         }
 
-    }
-
-    /**
-     * Get an existed entry or create and return a new entry.
-     *
-     * @return \ServerGrove\Bundle\TranslationEditorBundle\Model\EntryInterface
-     */
-    protected function getOrCreateEntry($alias, $domain, $fileName, $entries)
-    {
-        $storageService  = $this->getContainer()->get('server_grove_translation_editor.storage');
-        $entryCollection = array_filter(
-            $entries,
-            function ($entry) use ($alias) {
-                return ($alias === $entry->getAlias());
-            }
-        );
-
-        return (count($entryCollection) > 0)
-            ? array_shift($entryCollection)
-            : $storageService->createEntry($domain, $fileName, $alias);
     }
 
     /**
