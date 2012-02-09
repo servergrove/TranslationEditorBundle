@@ -21,6 +21,15 @@
         <service id="server_grove_translation_editor.storage_manager" class="ServerGrove\Bundle\TranslationEditorBundle\MongoStorageManager">
             <argument type="service" id="service_container"/>
         </service>
+        
+        <!--
+        Default file exporter
+        
+        Note that this file exporter need to implement in a generic way such that it supports other file formats.
+        -->
+        <service id="server_grove_translation_editor.exporter" class="ServerGrove\Bundle\TranslationEditorBundle\Service\XliffFileHandler">
+            <!-- No argument -->
+        </service>
 
     </services>
 </container>

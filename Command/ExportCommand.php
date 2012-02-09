@@ -35,9 +35,13 @@ class ExportCommand extends Base
         $kernel  = $this->getContainer()->get('kernel');
         $domains = $this->getDomainList($kernel, false);
 
+        $this->output->write('Exporting translation files for');
         foreach ($domains as $domain) {
-            $this->exportDomain($domain['name']);
+            $this->exportDomain($domain);
         }
+        
+        $this->output->writeln('');
+        $this->output->writeln('Done');
     }
     
     /**
@@ -49,36 +53,40 @@ class ExportCommand extends Base
      */
     protected function exportDomain($domain)
     {
-        $this->output->writeln(sprintf('Exporting <info>%s</info>', $domain));
+        $domainName = $domain['name'];
         
-        $translations   = array();
-        $storageService = $this->getContainer()->get('server_grove_translation_editor.storage');
-        $entries        = $storageService->findEntryList(array('domain' => $domain));
+        $translationTable = array();
+        $storageService   = $this->getContainer()->get('server_grove_translation_editor.storage');
+        $entries          = $storageService->findEntryList(array('domain' => $domainName));
         
         // Classify all entries by locale.
         foreach ($entries as $entry) {
-            $entryId    = $entry->getId();
-            $entryAlias = $entry->getAlias();
+            $entryId       = $entry->getId();
+            $entryAlias    = $entry->getAlias();
+            $entryFilename = $entry->getFileName();
             
+            // Assign the translation to the translation table
             foreach ($entry->getTranslations() as $translation) {
                 $locale  = (string) $translation->getLocale();
                 $context = trim($translation->getValue());
                 
-                if (!isset($translations[$locale])) {
-                    $translations[$locale] = array();
-                }
-                
-                $translations[$locale][] = array(
-                    'id'      => $entryId,
-                    'alias'   => $entryAlias,
-                    'context' => preg_match($this->cdataPattern, $context)
-                        ? $unit = sprintf("<![CDATA[%s]]>", $context)
-                        : $context
+                $translationTable[$locale][] = array(
+                    'filename' => $entryFilename,
+                    'id'       => $entryId,
+                    'alias'    => $entryAlias,
+                    'context'  => $context
                 );
             }
         }
         
-        $this->writeFile($translations);
+        // If there is no translation, there will be no need to proceed for this iteration.
+        if (empty($translationTable)) {
+            $this->output->write(sprintf(' <error>%s</error>', $domainName));
+            return;
+        }
+        
+        $this->writeFiles($domain, $translationTable);
+        $this->output->write(sprintf(' <info>%s</info>', $domainName));
     }
     
     /**
@@ -88,46 +96,12 @@ class ExportCommand extends Base
      *
      * @param array $translationTable two-dimension table of locale (1D) and trans unit (2D)
      */
-    protected function writeFile(array $translationTable)
+    protected function writeFiles($domainPath, array $translationTable)
     {
-        // XLIFF file template requires two variables: locale and trans units (in this order).
-        $xliffFileTemplate = implode("\n", array(
-            '<?xml version="1.0"?>',
-            '<xliff version="1.2"',
-                   'xmlns="urn:oasis:names:tc:xliff:document:1.2"',
-                   'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"',
-                   'xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 ../../../../../../../../app/Resources/translations/xliff-core-1.2-strict.xsd.xml">',
-                '<file source-language="%s" datatype="plaintext" original="file.ext">',
-                    '<body>%s</body>',
-                '</file>',
-            '</xliff>'
-        ));
+        $exporter = $this->getContainer()->get('server_grove_translation_editor.exporter');
         
-        // XLIFF file template requires two variables: id, alias and context (in this order).
-        $xliffTransUnitTemplate = implode("\n", array(
-            '<trans-unit id="%d">',
-                '<source>%s</source>',
-                '<target>%s</target>',
-            '</trans-unit>',
-        ));
-        
-        foreach ($translationTable as $locale => $entries)
-        {
-            $renderedTransUnits = array();
-            
-            // Render only a trans unit per entry.
-            foreach ($entries as $entry) {
-                $renderedTransUnits[] = sprintf(
-                    $xliffTransUnitTemplate, $entry['id'], $entry['alias'], $entry['context']
-                );
-            }
-            
-            // Render the whole XLIFF file.
-            $renderedXliffFile = sprintf(
-                $xliffFileTemplate, $locale, implode("\n", $renderedTransUnits)
-            );
-            
-            // @TODO: Write a file out.
+        foreach ($translationTable as $locale => $entries) {
+            $exporter->writeFiles($domainPath, $locale, $entries);
         }
     }
 }
