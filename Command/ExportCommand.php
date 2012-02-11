@@ -8,14 +8,12 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Dumper;
+
 /**
  * Command for exporting translations into files
  */
-
 class ExportCommand extends Base
 {
-
-
     protected function configure()
     {
         parent::configure();
@@ -24,7 +22,8 @@ class ExportCommand extends Base
         ->setName('locale:editor:export')
         ->setDescription('Export translations into files')
         ->addArgument('filename')
-        ->addOption("dry-run")
+        ->addOption('dry-run')
+        ->addOption('pretty-print')
         ;
 
     }
@@ -105,7 +104,7 @@ class ExportCommand extends Base
             case 'xliff':
                 $xml = new \SimpleXMLElement('<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2"></xliff>');
 
-            	$xliff_file = $xml->addChild("file");
+                $xliff_file = $xml->addChild("file");
             	$xliff_file->addAttribute("source-language", $locale);
             	$xliff_file->addAttribute("datatype", "plaintext");
             	$xliff_file->addAttribute("original", "file.ext");
@@ -124,7 +123,17 @@ class ExportCommand extends Base
             		$unit->addChild("target", $target);
             	}
 
-                $result = $xml->asXML();
+            	$result = $xml->asXML();
+            	
+            	if ($this->input->getOption('pretty-print')) {
+            		$dom = new \DOMDocument('1.0');
+            		$dom->preserveWhiteSpace = false;
+            		$dom->formatOutput       = true;
+            		$dom->loadXML($result);
+            		
+            		$result = $dom->saveXML();
+            	}
+            	
                 break;
         }
 
@@ -133,8 +142,5 @@ class ExportCommand extends Base
     		file_put_contents($filename, $result);
     	}
     }
-
-
 }
-
 
