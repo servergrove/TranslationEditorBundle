@@ -21,6 +21,41 @@ class ORMStorage extends AbstractStorage implements StorageInterface
         $repository = $this->manager->getRepository(self::CLASS_LOCALE);
         $builder    = $repository->createQueryBuilder('l');
 
+        $builder->addSelect('t')->leftJoin('l.translations', 't')
+                ->addSelect('e')->leftJoin('t.entry', 'e');
+
+        $this->hydrateCriteria($builder, $criteria);
+
+        return $builder->getQuery()->getResult();
+    }
+
+    /**
+     * {{@inheritdoc}}
+     */
+    public function findEntryList(array $criteria = array())
+    {
+        $repository = $this->manager->getRepository(self::CLASS_ENTRY);
+        $builder    = $repository->createQueryBuilder('e');
+
+        $builder->addSelect('t')->leftJoin('e.translations', 't')
+                ->addSelect('l')->leftJoin('t.locale', 'l');
+
+        $this->hydrateCriteria($builder, $criteria);
+
+        return $builder->getQuery()->getResult();
+    }
+
+    /**
+     * {{@inheritdoc}}
+     */
+    public function findTranslationList(array $criteria = array())
+    {
+        $repository = $this->manager->getRepository(self::CLASS_TRANSLATION);
+        $builder    = $repository->createQueryBuilder('t');
+
+        $builder->addSelect('e')->leftJoin('t.entry', 'e')
+                ->addSelect('l')->leftJoin('t.locale', 'l');
+
         $this->hydrateCriteria($builder, $criteria);
 
         return $builder->getQuery()->getResult();
@@ -44,22 +79,6 @@ class ORMStorage extends AbstractStorage implements StorageInterface
     /**
      * {{@inheritdoc}}
      */
-    public function findEntryList(array $criteria = array())
-    {
-        $repository = $this->manager->getRepository(self::CLASS_ENTRY);
-        $builder    = $repository->createQueryBuilder('e');
-
-        $builder->leftJoin('e.translations', 't')
-                ->leftJoin('t.locale', 'l');
-
-        $this->hydrateCriteria($builder, $criteria);
-
-        return $builder->getQuery()->getResult();
-    }
-
-    /**
-     * {{@inheritdoc}}
-     */
     public function createEntry($domain, $fileName, $alias)
     {
         $entryClass = self::CLASS_ENTRY;
@@ -70,40 +89,6 @@ class ORMStorage extends AbstractStorage implements StorageInterface
         $entry->setAlias($alias);
 
         return $this->persist($entry);
-    }
-
-    /**
-     * {{@inheritdoc}}
-     */
-    public function deleteEntry($id)
-    {
-        try {
-            $entryProxy = $this->manager->getReference(self::CLASS_ENTRY, $id);
-
-            $this->manager->remove($entryProxy);
-            $this->manager->flush();
-
-            return true;
-        } catch (\Exception $e) {
-            return $e->getMessage();
-
-            // Do nothing
-        }
-
-        return false;
-    }
-
-    /**
-     * {{@inheritdoc}}
-     */
-    public function findTranslationList(array $criteria = array())
-    {
-        $repository = $this->manager->getRepository(self::CLASS_TRANSLATION);
-        $builder    = $repository->createQueryBuilder('t');
-
-        $this->hydrateCriteria($builder, $criteria);
-
-        return $builder->getQuery()->getResult();
     }
 
     /**
@@ -121,12 +106,52 @@ class ORMStorage extends AbstractStorage implements StorageInterface
         return $this->persist($translation);
     }
 
+    /**
+     * {{@inheritdoc}}
+     */
+    public function deleteLocale($id)
+    {
+        return $this->delete(self::CLASS_LOCALE, $id);
+    }
+
+    /**
+     * {{@inheritdoc}}
+     */
+    public function deleteEntry($id)
+    {
+        return $this->delete(self::CLASS_ENTRY, $id);
+    }
+
+    /**
+     * {{@inheritdoc}}
+     */
+    public function deleteTranslation($id)
+    {
+        return $this->delete(self::CLASS_TRANSLATION, $id);
+    }
+
     public function persist($entity)
     {
         $this->manager->persist($entity);
         $this->manager->flush();
 
         return $entity;
+    }
+
+    protected function delete($entityClassName, $id)
+    {
+        try {
+            $entityProxy = $this->manager->getReference($entityClassName, $id);
+
+            $this->manager->remove($entityProxy);
+            $this->manager->flush();
+
+            return true;
+        } catch (\Exception $e) {
+            // Do nothing
+        }
+
+        return false;
     }
 
     protected function hydrateCriteria($builder, array $criteria = array())

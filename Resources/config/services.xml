@@ -6,11 +6,13 @@
 
     <services>
 
+        <!-- Storage services -->
+
         <service id="server_grove_translation_editor.storage" factory-method="get" factory-service="service_container" class="ServerGrove\Bundle\TranslationEditorBundle\Storage\StorageInterface">
             <argument>%server_grove_translation_editor.storage.type%</argument>
         </service>
 
-        <service id="server_grove_translation_editor.storage.type.orm" class="ServerGrove\Bundle\TranslationEditorBundle\Storage\ORMStorage">
+        <service id="server_grove_translation_editor.storage.orm" class="ServerGrove\Bundle\TranslationEditorBundle\Storage\ORMStorage">
             <argument type="service" id="server_grove_translation_editor.storage.manager"/>
         </service>
 
@@ -18,18 +20,27 @@
             <argument>%server_grove_translation_editor.storage.manager%</argument>
         </service>
 
-        <service id="server_grove_translation_editor.storage_manager" class="ServerGrove\Bundle\TranslationEditorBundle\MongoStorageManager">
-            <argument type="service" id="service_container"/>
+
+        <!-- Importer services -->
+
+        <service id="server_grove_translation_editor.importer" factory-method="get" factory-service="service_container" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Importer\ImporterInterface">
+            <argument>%server_grove_translation_editor.importer.type%</argument>
         </service>
-        
-        <!--
-        Default file exporter
-        
-        Note that this file exporter need to implement in a generic way such that it supports other file formats.
-        -->
-        <service id="server_grove_translation_editor.exporter" class="ServerGrove\Bundle\TranslationEditorBundle\Service\XliffFileHandler">
-            <!-- No argument -->
+
+        <service id="server_grove_translation_editor.importer.xliff" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Importer\XliffImporter">
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
         </service>
+
+
+        <!-- Exporter services -->
+
+        <service id="server_grove_translation_editor.exporter" factory-method="get" factory-service="service_container" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Exporter\ExporterInterface">
+            <argument>%server_grove_translation_editor.exporter.type%</argument>
+        </service>
+
+        <service id="server_grove_translation_editor.exporter.xliff" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Exporter\XliffExporter"/>
 
     </services>
 </container>
