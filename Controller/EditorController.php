@@ -3,15 +3,11 @@
 namespace ServerGrove\Bundle\TranslationEditorBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller,
+    Symfony\Component\HttpFoundation\RedirectResponse,
     Symfony\Component\HttpFoundation\Response;
 
 class EditorController extends Controller
 {
-    public function getCollection()
-    {
-        return $this->container->get('server_grove_translation_editor.storage_manager')->getCollection();
-    }
-
     public function listAction()
     {
         $storageService = $this->container->get('server_grove_translation_editor.storage');
@@ -57,46 +53,53 @@ class EditorController extends Controller
 
     public function addAction()
     {
-        $request = $this->getRequest();
+        $storageService = $this->container->get('server_grove_translation_editor.storage');
+        $request        = $this->getRequest();
 
-        $locales = $request->request->get('locale');
-        $key = $request->request->get('key');
+        // Retrieve variables
+        $translations = $request->request->get('translations');
+        $fileName     = $request->request->get('fileName');
+        $domain       = $request->request->get('domain');
+        $alias        = $request->request->get('alias');
 
-        foreach($locales as $locale => $val ) {
-            $values = $this->getCollection()->find(array('locale' => $locale));
-            $values = iterator_to_array($values);
-            if (!count($values)) {
-                continue;
-            }
-            $found = false;
-            foreach ($values as $data) {
-                if (isset($data['entries'][$key])) {
-                    $res = array(
-                        'result' => false,
-                        'msg' => 'The key already exists. Please update it instead.',
-                    );
-                    return new Response(json_encode($res));
-                }
-            }
+        // Check for existent domain/alias
+        $entryList =  $storageService->findEntryList(array(
+            'domain' => $domain,
+            'alias'  => $alias
+        ));
 
-            $data = array_pop($values);
+        if (count($entryList)) {
+            $result = array(
+                'result' => false,
+                'msg' => 'The alias already exists. Please update it instead.',
+            );
 
-            $data['entries'][$key] = $val;
-
-            if (!$request->request->get('check-only')) {
-                $this->updateData($data);
-            }
+            return new Response(json_encode($result));
         }
 
+        // Create new Entry
+        $entry = $storageService->createEntry($domain, $fileName, $alias);
+
+        // Create Translations
+        $translations = array_filter($translations);
+
+        foreach ($translations as $localeId => $translationValue) {
+            $locale = $storageService->findLocaleList(array('id' => $localeId));
+            $locale = reset($locale);
+
+            $storageService->createTranslation($locale, $entry, $translationValue);
+        }
+
+        // Return reponse according to request type
         if ($request->isXmlHttpRequest()) {
-            $res = array(
+            $result = array(
                 'result' => true,
             );
 
-            return new Response(json_encode($res));
+            return new Response(json_encode($result));
         }
 
-        return new \Symfony\Component\HttpFoundation\RedirectResponse($this->generateUrl('sg_localeditor_list'));
+        return new RedirectResponse($this->generateUrl('sg_localeditor_list'));
     }
 
     public function updateAction()
@@ -134,12 +137,5 @@ class EditorController extends Controller
                 'Content-type' => 'application/json'
             ));
         }
-    }
-
-    protected function updateData($data)
-    {
-        $this->getCollection()->update(
-            array('_id' => $data['_id'])
-            , $data, array('upsert' => true));
     }
 }

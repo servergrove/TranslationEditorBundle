@@ -102,9 +102,12 @@
             success: function(data) {
                 if (data && data.result) {
                     $('#domain').val('');
-                    $('#domain').focus();
+                    $('#fileName').val('');
                     $('#alias').val('');
                     $('#newtranslation textarea').val('');
+
+                    $('#newtranslation').hide();
+
                     $('#insert-ok').html('New translation inserted successfully');
                     $('#insert-ok').show();
                 } else {
@@ -156,6 +159,10 @@
     <input type="text" id="domain" name="domain" style="width: 700px"/>
     <br/>
 
+    <label>File Name:</label>
+    <input type="text" id="fileName" name="fileName" style="width: 700px"/>
+    <br/>
+
     <label>Alias:</label>
     <input type="text" id="alias" name="alias" style="width: 700px"/>
     <br/>
@@ -168,10 +175,10 @@
 
     <input type="submit" value="Save" class="btn primary">
     <input class="btn" type="button" value="Cancel" onclick="$('.alert-message').hide();$('#newtranslation').hide()">
-
-    <p id="insert-ok" class="alert-message success" style="display: none"></p>
-    <p id="insert-error" class="alert-message error" style="display: none">An error ocurred while adding the translation<span id="errmsg"></span></p>
 </form>
+
+<p id="insert-ok" class="alert-message success" style="display: none"></p>
+<p id="insert-error" class="alert-message error" style="display: none">An error ocurred while adding the translation<span id="errmsg"></span></p>
 
 <table class="zebra-striped">
     <thead>
