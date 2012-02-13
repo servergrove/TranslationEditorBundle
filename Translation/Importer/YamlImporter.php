@@ -2,7 +2,8 @@
 
 namespace ServerGrove\Bundle\TranslationEditorBundle\Translation\Importer;
 
-use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Symfony\Component\HttpKernel\Bundle\Bundle,
+    Symfony\Component\Yaml\Parser;
 
 use ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface;
 
@@ -31,13 +32,10 @@ class XliffImporter extends AbstractImporter implements ImporterInterface
         ));
 
         // Loading file
-        $xliff        = simplexml_load_file($filePath);
-        $xliffEntries = $xliff->file->body->children();
+        $yaml        = new Parser();
+        $yamlEntries = $yaml->parse(file_get_contents($filePath));
 
-        foreach ($xliffEntries as $xliffEntry) {
-            $alias = (string) $xliffEntry->source;
-            $value = (string) $xliffEntry->target;
-
+        foreach ($yamlEntries as $alias => $value) {
             $entry = $this->importEntry($bundleName, $fileName, $alias, $entryList);
 
             $this->importTranslation($locale, $entry, $value);
