@@ -29,6 +29,15 @@ interface StorageInterface
     public function createLocale($language, $country = null);
 
     /**
+     * Delete an existing Locale
+     *
+     * @param integer $id
+     *
+     * @return boolean
+     */
+    public function deleteLocale($id);
+
+    /**
      * Retrieve a list of Entries based on search criteria
      *
      * @param array $criteria
@@ -49,6 +58,24 @@ interface StorageInterface
     public function createEntry($domain, $fileName, $alias);
 
     /**
+     * Delete an existing Entry
+     *
+     * @param integer $id
+     *
+     * @return boolean
+     */
+    public function deleteEntry($id);
+
+    /**
+     * Retrieve a list of Translations based on search criteria
+     *
+     * @param array $criteria
+     *
+     * @return array
+     */
+    public function findTranslationList(array $criteria = array());
+
+    /**
      * Create a new Translation.
      *
      * @param \ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface $locale
@@ -59,4 +86,21 @@ interface StorageInterface
      */
     public function createTranslation($locale, $entry, $value);
 
+    /**
+     * Delete an existing Translation
+     *
+     * @param integer $id
+     *
+     * @return boolean
+     */
+    public function deleteTranslation($id);
+
+    /**
+     * Persist a given entity onstorage
+     *
+     * @param object $entity
+     *
+     * @return object
+     */
+    public function persist($entity);
 }
