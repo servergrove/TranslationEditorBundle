@@ -33,6 +33,12 @@
             </call>
         </service>
 
+        <service id="server_grove_translation_editor.importer.yaml" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Importer\YamlImporter">
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
 
         <!-- Exporter services -->
 
