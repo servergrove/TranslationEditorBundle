@@ -213,7 +213,11 @@
 {% block body %}
 <form id="newtranslation" style="display: none" method="POST" onsubmit="return saveEntryForm($('#newtranslation'))" action="{{path('sg_localeditor_add_translation')}}">
     <label>Domain:</label>
-    <input type="text" id="domain" name="domain" style="width: 700px"/>
+    <select id="domain" name="domain" style="width: 500px">
+    {% for bundle in bundleList %}
+        <option value="{{bundle.getName()}}">{{bundle.getName()}}</option>
+    {% endfor %}
+    </select>
     <br/>
 
     <label>File Name:</label>
