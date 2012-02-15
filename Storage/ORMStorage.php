@@ -14,7 +14,7 @@ class ORMStorage extends AbstractStorage implements StorageInterface
     const CLASS_TRANSLATION = 'ServerGrove\Bundle\TranslationEditorBundle\Entity\Translation';
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     protected function getLocaleClassName()
     {
@@ -22,7 +22,7 @@ class ORMStorage extends AbstractStorage implements StorageInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     protected function getEntryClassName()
     {
@@ -30,7 +30,7 @@ class ORMStorage extends AbstractStorage implements StorageInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     protected function getTranslationClassName()
     {
@@ -38,7 +38,7 @@ class ORMStorage extends AbstractStorage implements StorageInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function findLocaleList(array $criteria = array())
     {
@@ -54,7 +54,7 @@ class ORMStorage extends AbstractStorage implements StorageInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function findEntryList(array $criteria = array())
     {
@@ -70,7 +70,7 @@ class ORMStorage extends AbstractStorage implements StorageInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function findTranslationList(array $criteria = array())
     {

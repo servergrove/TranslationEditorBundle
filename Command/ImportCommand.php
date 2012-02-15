@@ -19,7 +19,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 class ImportCommand extends AbstractCommand
 {
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     protected function configure()
     {
@@ -35,7 +35,7 @@ class ImportCommand extends AbstractCommand
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {

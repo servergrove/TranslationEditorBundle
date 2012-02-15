@@ -42,7 +42,7 @@ abstract class Translation implements TranslationInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function getEntry()
     {
@@ -50,7 +50,7 @@ abstract class Translation implements TranslationInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function setEntry(EntryInterface $entry)
     {
@@ -60,7 +60,7 @@ abstract class Translation implements TranslationInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function getLocale()
     {
@@ -68,7 +68,7 @@ abstract class Translation implements TranslationInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function setLocale(LocaleInterface $locale)
     {
@@ -78,7 +78,7 @@ abstract class Translation implements TranslationInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function getValue()
     {
@@ -86,7 +86,7 @@ abstract class Translation implements TranslationInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function setValue($value)
     {

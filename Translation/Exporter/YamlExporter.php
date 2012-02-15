@@ -15,7 +15,7 @@ use ServerGrove\Bundle\TranslationEditorBundle\Model\TranslationInterface;
 class YamlExporter implements ExporterInterface
 {
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function getFileExtension()
     {
@@ -23,7 +23,7 @@ class YamlExporter implements ExporterInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function exportFile($filePath, ArrayCollection $translationList)
     {

@@ -14,7 +14,7 @@ use ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface;
 class XliffImporter extends AbstractImporter implements ImporterInterface
 {
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function importFile(Bundle $bundle, LocaleInterface $locale, $filePath)
     {

@@ -57,7 +57,7 @@ abstract class Locale implements LocaleInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function getLanguage()
     {
@@ -65,7 +65,7 @@ abstract class Locale implements LocaleInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function setLanguage($language)
     {
@@ -73,7 +73,7 @@ abstract class Locale implements LocaleInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function getCountry()
     {
@@ -81,7 +81,7 @@ abstract class Locale implements LocaleInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function setCountry($country = null)
     {
@@ -89,7 +89,7 @@ abstract class Locale implements LocaleInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function getActive()
     {
@@ -97,7 +97,7 @@ abstract class Locale implements LocaleInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function setActive($active)
     {
@@ -105,7 +105,7 @@ abstract class Locale implements LocaleInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function addTranslation(TranslationInterface $translation)
     {
@@ -115,7 +115,7 @@ abstract class Locale implements LocaleInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function getTranslations()
     {

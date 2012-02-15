@@ -56,7 +56,7 @@ abstract class Entry implements EntryInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function getDomain()
     {
@@ -64,7 +64,7 @@ abstract class Entry implements EntryInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function setDomain($domain)
     {
@@ -72,7 +72,7 @@ abstract class Entry implements EntryInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function getFileName()
     {
@@ -80,7 +80,7 @@ abstract class Entry implements EntryInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function setFileName($fileName)
     {
@@ -88,7 +88,7 @@ abstract class Entry implements EntryInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function getAlias()
     {
@@ -96,7 +96,7 @@ abstract class Entry implements EntryInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function setAlias($alias)
     {
@@ -104,7 +104,7 @@ abstract class Entry implements EntryInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function addTranslation(TranslationInterface $translation)
     {
@@ -114,7 +114,7 @@ abstract class Entry implements EntryInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function getTranslations()
     {

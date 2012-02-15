@@ -17,7 +17,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 class ExportCommand extends AbstractCommand
 {
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     protected function configure()
     {
@@ -33,7 +33,7 @@ class ExportCommand extends AbstractCommand
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {

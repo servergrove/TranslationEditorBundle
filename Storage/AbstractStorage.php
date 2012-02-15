@@ -27,7 +27,7 @@ abstract class AbstractStorage
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function createLocale($language, $country = null)
     {
@@ -42,7 +42,7 @@ abstract class AbstractStorage
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function createEntry($domain, $fileName, $alias)
     {
@@ -57,7 +57,7 @@ abstract class AbstractStorage
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function createTranslation($locale, $entry, $value)
     {
@@ -72,7 +72,7 @@ abstract class AbstractStorage
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function deleteLocale($id)
     {
@@ -80,7 +80,7 @@ abstract class AbstractStorage
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function deleteEntry($id)
     {
@@ -88,7 +88,7 @@ abstract class AbstractStorage
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function deleteTranslation($id)
     {
@@ -96,7 +96,7 @@ abstract class AbstractStorage
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function persist($entity)
     {

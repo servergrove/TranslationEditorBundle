@@ -16,7 +16,7 @@ use ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface,
 abstract class AbstractImporter extends ContainerAware
 {
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function importLocale($language, $country = null)
     {

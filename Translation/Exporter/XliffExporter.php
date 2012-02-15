@@ -33,7 +33,7 @@ class XliffExporter implements ExporterInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function getFileExtension()
     {
@@ -41,7 +41,7 @@ class XliffExporter implements ExporterInterface
     }
 
     /**
-     * {{@inheritdoc}}
+     * {@inheritdoc}
      */
     public function exportFile($filePath, ArrayCollection $translationList)
     {
