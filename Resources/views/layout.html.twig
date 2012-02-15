@@ -37,6 +37,7 @@
                     <a class="brand" href="#">Symfony2 Translation Editor</a>
 
                     <ul class="nav">
+                        <li><a href="#" onclick="$('.alert-message').hide();$('#newlocale').show();$('#language').focus()">New Locale</a></li>
                         <li><a href="#" onclick="$('.alert-message').hide();$('#newtranslation').show();$('#domain').focus()">New Entry</a></li>
                         <li><a href="#" onclick="this.innerHTML = 'Reloading...';window.location.reload()">Reload List</a></li>
                         <li><a href="https://github.com/servergrove/TranslationEditorBundle">About</a></li>
@@ -50,9 +51,13 @@
                 <div class="well">
                     <h5>Available Locales</h5>
 
-                    <ul>
+                    <ul style="padding: 0; margin: 0; list-style: none">
                         {% for locale in localeList %}
-                        <li>{{locale}} {% if locale == defaultLocale %}<span class="label">Default</span>{%endif%}</li>
+                        <li id="locale-{{loop.index}}" style="padding: 2px 0">
+                            <input id="remove-locale-{{loop.index}}" class=" btn danger mysmall" type="button" value="Remove" onclick="confirm('Are you sure?') && removeLocale('{{loop.index}}', '{{ locale.getId() }}')">
+                            {{locale}}
+                            {% if locale == defaultLocale %}<span class="label">Default</span>{%endif%}
+                        </li>
                         {% endfor %}
                     </ul>
 

@@ -1,15 +1,23 @@
-sg_localeditor_list:
+sg_localeditor_index:
     pattern:  /editor
-    defaults: { _controller: ServerGroveTranslationEditorBundle:Editor:list }
+    defaults: { _controller: ServerGroveTranslationEditorBundle:Editor:index }
 
-sg_localeditor_update:
-    pattern:  /update
-    defaults: { _controller: ServerGroveTranslationEditorBundle:Editor:update }
+sg_localeditor_update_translation:
+    pattern:  /update-translation
+    defaults: { _controller: ServerGroveTranslationEditorBundle:Editor:updateTranslation }
 
-sg_localeditor_add:
-    pattern:  /add
-    defaults: { _controller: ServerGroveTranslationEditorBundle:Editor:add }
+sg_localeditor_add_translation:
+    pattern:  /add-translation
+    defaults: { _controller: ServerGroveTranslationEditorBundle:Editor:addTranslation }
 
-sg_localeditor_remove:
-    pattern:  /remove
-    defaults: { _controller: ServerGroveTranslationEditorBundle:Editor:remove }
+sg_localeditor_remove_translation:
+    pattern:  /remove-translation
+    defaults: { _controller: ServerGroveTranslationEditorBundle:Editor:removeTranslation }
+
+sg_localeditor_add_locale:
+    pattern:  /add-locale
+    defaults: { _controller: ServerGroveTranslationEditorBundle:Editor:addLocale }
+
+sg_localeditor_remove_locale:
+    pattern:  /remove-locale
+    defaults: { _controller: ServerGroveTranslationEditorBundle:Editor:removeLocale }

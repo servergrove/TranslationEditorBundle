@@ -45,14 +45,14 @@ abstract class AbstractCommand extends ContainerAwareCommand
         $sourcePath = realpath($kernel->getRootDir() . '/../src');
 
         // Filter non-application bundles
-        $bundles = array_filter(
+        $bundleList = array_filter(
             $kernel->getBundles(),
             function ($bundle) use ($sourcePath) {
                 return (strpos($bundle->getPath(), $sourcePath) === 0);
             }
         );
 
-        return $bundles;
+        return $bundleList;
     }
 
     /**

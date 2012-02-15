@@ -3,7 +3,7 @@
 {% block sidebar %}
 <script>
 
-    function showAll()
+    function showEntryListAll()
     {
         var $zebraStripedTable = $('.zebra-striped');
 
@@ -14,7 +14,7 @@
                           .addClass('.zebra-striped');
     }
 
-    function showMissing()
+    function showEntryListMissing()
     {
         var $zebraStripedTable = $('.zebra-striped');
 
@@ -25,20 +25,20 @@
                           .addClass('.zebra-striped');
     }
 
-    function showEditor(id)
+    function showTranslationEditForm(id)
     {
         $('#current-' + id).hide();
         $('#editor-' + id).show();
         $('#editor-' + id + ' textarea').focus();
     }
 
-    function hideEditor(id)
+    function hideTranslationEditForm(id)
     {
         $('#current-' + id).show();
         $('#editor-' + id).hide();
     }
 
-    function saveChange(id, entryId, localeId)
+    function saveTranslation(id, entryId, localeId)
     {
         $('#save-'+id).val('Saving...');
 
@@ -46,7 +46,7 @@
 
         $.ajax({
             type: "POST",
-            url: '{{path('sg_localeditor_update')}}',
+            url: '{{path('sg_localeditor_update_translation')}}',
             data: {
                 'entryId':  entryId,
                 'localeId': localeId,
@@ -60,7 +60,7 @@
                 $currentContent.html(newVal);
                 $currentContent.parent().find('.label').hide();
 
-                hideEditor(id);
+                hideTranslationEditForm(id);
             }
         });
     }
@@ -71,7 +71,7 @@
 
         $.ajax({
             type: "POST",
-            url: '{{path('sg_localeditor_remove')}}',
+            url: '{{path('sg_localeditor_remove_translation')}}',
             data: {'id': entryId},
             success: function(data) {
                 if (data.result) {
@@ -87,7 +87,7 @@
         });
     }
 
-    function submitAjaxForm(form)
+    function saveEntryForm(form)
     {
         var url  = form.attr('action'),
             data = form.serializeArray();
@@ -100,23 +100,80 @@
             data:     data,
             type:     'POST',
             success: function(data) {
+                var message;
+
                 if (data && data.result) {
-                    $('#domain').val('');
-                    $('#fileName').val('');
-                    $('#alias').val('');
-                    $('#newtranslation textarea').val('');
+                    form[0].reset();
 
                     $('#newtranslation').hide();
 
-                    $('#insert-ok').html('New translation inserted successfully');
+                    $('#insert-ok').html(data.message);
                     $('#insert-ok').show();
                 } else {
-                    if (data && data.msg) {
-                        $('#errmsg').html(': ' + data.msg);
-                    } else {
-                        $('#errmsg').html('');
-                    }
+                    message = (data && data.message)
+                        ? ': ' + data.message
+                        : 'Unknown error';
 
+                    $('#errmsg').html(message);
+                    $('#insert-error').show();
+                }
+
+            }
+        });
+
+        return false;
+    }
+
+    function removeLocale(id, localeId)
+    {
+        $('#remove-locale-' + id).val('Removing...');
+
+        $.ajax({
+            type: "POST",
+            url: '{{path('sg_localeditor_remove_locale')}}',
+            data: {'id': localeId},
+            success: function(data) {
+                if (data.result) {
+                    $('#locale-' + id).remove();
+                } else {
+                    $('#remove-locale-' + id).val('Failure');
+
+                    setTimeout(function () {
+                        $('#remove=locale-' + id).val('Remove');
+                    }, 3000);
+                }
+            }
+        });
+    }
+
+    function saveLocaleForm(form)
+    {
+        var url  = form.attr('action'),
+            data = form.serializeArray();
+
+        $('.alert-message').hide();
+
+        $.ajax({
+            url:      url,
+            dataType: 'json',
+            data:     data,
+            type:     'POST',
+            success: function(data) {
+                var message;
+
+                if (data && data.result) {
+                    form[0].reset();
+
+                    $('#newlocale').hide();
+
+                    $('#insert-ok').html(data.message);
+                    $('#insert-ok').show();
+                } else {
+                    message = (data && data.message)
+                        ? ': ' + data.message
+                        : 'Unknown error';
+
+                    $('#errmsg').html(message);
                     $('#insert-error').show();
                 }
 
@@ -148,13 +205,13 @@
 <h5>Stats</h5>
 
 <ul>
-    <li><a href="#" onclick="showAll()">Entries: {{ defaultLocale.getTranslations().count() }}</a></li>
-    <li><a href="#" onclick="showMissing()">Missing translations</a></li>
+    <li><a href="#" onclick="showEntryListAll()">Entries: {{ defaultLocale.getTranslations().count() }}</a></li>
+    <li><a href="#" onclick="showEntryListMissing()">Missing translations</a></li>
 </ul>
 {% endblock %}
 
 {% block body %}
-<form id="newtranslation" style="display: none" method="POST" onsubmit="return submitAjaxForm($('#newtranslation'))" action="{{path('sg_localeditor_add')}}">
+<form id="newtranslation" style="display: none" method="POST" onsubmit="return saveEntryForm($('#newtranslation'))" action="{{path('sg_localeditor_add_translation')}}">
     <label>Domain:</label>
     <input type="text" id="domain" name="domain" style="width: 700px"/>
     <br/>
@@ -175,6 +232,19 @@
 
     <input type="submit" value="Save" class="btn primary">
     <input class="btn" type="button" value="Cancel" onclick="$('.alert-message').hide();$('#newtranslation').hide()">
+</form>
+
+<form id="newlocale" style="display: none" method="POST" onsubmit="return saveLocaleForm($('#newlocale'))" action="{{path('sg_localeditor_add_locale')}}">
+    <label>Language:</label>
+    <input type="text" id="language" name="language" maxlength="2" size="2"/>
+    <br />
+
+    <label>Country (optional):</label>
+    <input type="text" id="country" name="country" maxlength="2" size="2"/>
+    <br/>
+
+    <input type="submit" value="Save" class="btn primary">
+    <input class="btn" type="button" value="Cancel" onclick="$('.alert-message').hide();$('#newlocale').hide()">
 </form>
 
 <p id="insert-ok" class="alert-message success" style="display: none"></p>
@@ -211,7 +281,7 @@
                 <div id="current-{{loop.parent.loop.index}}-{{locale}}">
                     {% set translation = entry.getTranslation(locale) %}
 
-                    <div id="current-{{loop.parent.loop.index}}-{{locale}}-content" onclick="showEditor('{{loop.parent.loop.index}}-{{locale}}')">
+                    <div id="current-{{loop.parent.loop.index}}-{{locale}}-content" onclick="showTranslationEditForm('{{loop.parent.loop.index}}-{{locale}}')">
                         {% if translation %}{{ translation.getValue() }}{% endif %}
                     </div>
 
@@ -220,15 +290,15 @@
                     {% endif %}
 
                     {% if not translation %}
-                        <span class="label important" onclick="showEditor('{{loop.parent.loop.index}}-{{locale}}')">Missing</span>
+                        <span class="label important" onclick="showTranslationEditForm('{{loop.parent.loop.index}}-{{locale}}')">Missing</span>
                     {% endif %}
                 </div>
 
                 <div id="editor-{{loop.parent.loop.index}}-{{locale}}" class="editor">
                     <textarea>{% if translation %}{{ translation.getValue() }}{% endif %}</textarea>
                     <br/>
-                    <input id="save-{{loop.parent.loop.index}}-{{locale}}"class="btn mysmall success" type="button" value="Save" onclick="saveChange('{{loop.parent.loop.index}}-{{locale}}', '{{entry.getId()}}', '{{locale.getId()}}')">
-                    <input class="btn mysmall" type="button" value="Cancel" onclick="hideEditor('{{loop.parent.loop.index}}-{{locale}}')">
+                    <input id="save-{{loop.parent.loop.index}}-{{locale}}"class="btn mysmall success" type="button" value="Save" onclick="saveTranslation('{{loop.parent.loop.index}}-{{locale}}', '{{entry.getId()}}', '{{locale.getId()}}')">
+                    <input class="btn mysmall" type="button" value="Cancel" onclick="hideTranslationEditForm('{{loop.parent.loop.index}}-{{locale}}')">
                 </div>
             </td>
             {% endfor %}
