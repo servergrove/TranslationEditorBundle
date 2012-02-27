@@ -50,7 +50,7 @@ class XliffExporter implements ExporterInterface
 
         // Creating file
         $xliffExporter   = new \SimpleXMLElement($this->xliffSkeleton);
-        $xliffBodyNode   = $this->exportRoot($xliffExporter, $fileParts[1]);
+        $xliffBodyNode   = $this->exportRoot($xliffExporter, $fileParts);
         $xliffIdentifier = 1;
 
         foreach ($translationList as $translation) {
@@ -65,17 +65,20 @@ class XliffExporter implements ExporterInterface
      * Export XLIFF root node
      *
      * @param \SimpleXMLElement $xliffExporter
-     * @param string $localeString
+     * @param array $fileParts
      *
      * @return \SimpleXMLElement
      */
-    protected function exportRoot(\SimpleXMLElement $xliffExporter, $localeString)
+    protected function exportRoot(\SimpleXMLElement $xliffExporter, $fileParts)
     {
+        $fileName      = $fileParts[0];
+        $localeString  = $fileParts[1];
+
         $xliffFileNode = $xliffExporter->addChild('file');
 
         $xliffFileNode->addAttribute('source-language', str_replace('_', '-', $localeString));
         $xliffFileNode->addAttribute('datatype', 'plaintext');
-        $xliffFileNode->addAttribute('original', $localeString . '.xliff');
+        $xliffFileNode->addAttribute('original', sprintf('%s.%s.%s', $fileName, $localeString, $this->getFileExtension()));
 
         return $xliffFileNode->addChild('body');
     }
