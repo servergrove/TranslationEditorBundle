@@ -73,7 +73,7 @@ class XliffExporter implements ExporterInterface
     {
         $xliffFileNode = $xliffExporter->addChild('file');
 
-        $xliffFileNode->addAttribute('source-language', $localeString);
+        $xliffFileNode->addAttribute('source-language', str_replace('_', '-', $localeString));
         $xliffFileNode->addAttribute('datatype', 'plaintext');
         $xliffFileNode->addAttribute('original', $localeString . '.xliff');
 
