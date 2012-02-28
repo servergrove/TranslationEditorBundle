@@ -67,8 +67,6 @@ A sample configuration (in your config_dev.yml):
       storage:
         type: server_grove_translation_editor.storage.orm
         manager: doctrine.orm.entity_manager
-      importer:
-        type: server_grove_translation_editor.importer.yaml
       exporter:
         type: server_grove_translation_editor.exporter.yaml
 

@@ -16,22 +16,6 @@ use ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface,
 abstract class AbstractImporter extends ContainerAware
 {
     /**
-     * {@inheritdoc}
-     */
-    public function importLocale($language, $country = null)
-    {
-        $storageService = $this->container->get('server_grove_translation_editor.storage');
-        $localeList     = $storageService->findLocaleList(array(
-            'language' => $language,
-            'country'  => $country
-        ));
-
-        return (count($localeList) === 1)
-            ? reset($localeList)
-            : $storageService->createLocale($language, $country);
-    }
-
-    /**
      * Import an Entry
      *
      * @param string $domain

@@ -43,4 +43,9 @@ class XliffImporter extends AbstractImporter implements ImporterInterface
             $this->importTranslation($locale, $entry, $value);
         }
     }
+
+    public function supports($filePath)
+    {
+        return 'xlf' === pathinfo($filePath, PATHINFO_EXTENSION);
+    }
 }

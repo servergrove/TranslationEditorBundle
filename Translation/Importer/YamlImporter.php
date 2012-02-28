@@ -41,4 +41,9 @@ class YamlImporter extends AbstractImporter implements ImporterInterface
             $this->importTranslation($locale, $entry, $value);
         }
     }
+
+    public function supports($filePath)
+    {
+        return 'yml' === pathinfo($filePath, PATHINFO_EXTENSION);
+    }
 }
