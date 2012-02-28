@@ -48,5 +48,7 @@
 
         <service id="server_grove_translation_editor.exporter.xliff" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Exporter\XliffExporter"/>
 
+        <service id="server_grove_translation_editor.exporter.yaml" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Exporter\YamlExporter"/>
+
     </services>
 </container>

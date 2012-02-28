@@ -76,7 +76,7 @@ Add the routing configuration to app/config/routing_dev.yml
 
 	SGTranslationEditorBundle:
 		resource: "@ServerGroveTranslationEditorBundle/Resources/config/routing.yml"
-		prefix:   /
+		prefix:   /translations
 
 ## Usage:
 
