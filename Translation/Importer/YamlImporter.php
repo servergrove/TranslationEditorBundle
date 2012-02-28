@@ -17,6 +17,14 @@ class YamlImporter extends AbstractImporter implements ImporterInterface
     /**
      * {@inheritdoc}
      */
+    public function getFileExtension()
+    {
+        return 'yml';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function importFile(Bundle $bundle, LocaleInterface $locale, $filePath)
     {
         // Extracting information
@@ -40,10 +48,5 @@ class YamlImporter extends AbstractImporter implements ImporterInterface
 
             $this->importTranslation($locale, $entry, $value);
         }
-    }
-
-    public function supports($filePath)
-    {
-        return 'yml' === pathinfo($filePath, PATHINFO_EXTENSION);
     }
 }

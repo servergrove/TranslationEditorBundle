@@ -16,6 +16,14 @@ class XliffImporter extends AbstractImporter implements ImporterInterface
     /**
      * {@inheritdoc}
      */
+    public function getFileExtension()
+    {
+        return 'xliff';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function importFile(Bundle $bundle, LocaleInterface $locale, $filePath)
     {
         // Extracting information
@@ -42,10 +50,5 @@ class XliffImporter extends AbstractImporter implements ImporterInterface
 
             $this->importTranslation($locale, $entry, $value);
         }
-    }
-
-    public function supports($filePath)
-    {
-        return 'xlf' === pathinfo($filePath, PATHINFO_EXTENSION);
     }
 }

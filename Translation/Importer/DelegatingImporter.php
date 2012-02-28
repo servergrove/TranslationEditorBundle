@@ -56,6 +56,14 @@ class DelegatingImporter implements ImporterInterface
     /**
      * {@inheritdoc}
      */
+    public function getFileExtension()
+    {
+        return null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function supports($filePath)
     {
         return true;

@@ -13,7 +13,7 @@ use ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface,
  *
  * @author Guilherme Blanco <guilhermeblanco@hotmail.com>
  */
-abstract class AbstractImporter extends ContainerAware
+abstract class AbstractImporter extends ContainerAware implements ImporterInterface
 {
     /**
      * Import an Entry
@@ -61,5 +61,13 @@ abstract class AbstractImporter extends ContainerAware
         if ( ! count($translationList)) {
             $storageService->createTranslation($locale, $entry, $value);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function supports($filePath)
+    {
+        return $this->getFileExtension() === pathinfo($filePath, PATHINFO_EXTENSION);
     }
 }

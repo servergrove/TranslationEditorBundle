@@ -13,6 +13,14 @@ use ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface;
  */
 interface ImporterInterface
 {
+
+    /**
+     * Retrieve the file extension
+     *
+     * @return string
+     */
+    function getFileExtension();
+
     /**
      * Import the translation entries.
      *
