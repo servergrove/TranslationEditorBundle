@@ -37,6 +37,7 @@
         <service id="server_grove_translation_editor.importer" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Importer\DelegatingImporter">
             <argument id="server_grove_translation_editor.storage" type="service"/>
             <call method="addImporter"><argument id="server_grove_translation_editor.importer.xliff" type="service"/></call>
+            <call method="addImporter"><argument id="server_grove_translation_editor.importer.yaml" type="service"/></call>
         </service>
 
 
