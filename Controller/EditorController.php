@@ -22,7 +22,7 @@ class EditorController extends Controller
         $kernelService  = $this->container->get('kernel');
 
         $sourcePath     = realpath($kernelService->getRootDir() . '/../src');
-        $defaultLocale  = $this->container->getParameter('locale', 'en');
+        $kernelDefaultLocale  = $this->container->getParameter('kernel.default_locale');
 
         // Retrieving mandatory information
         $localeList = $storageService->findLocaleList();
@@ -39,8 +39,8 @@ class EditorController extends Controller
         // Processing default locale
         $defaultLocale = array_filter(
             $localeList,
-            function ($locale) use ($defaultLocale) {
-                return $locale->equalsTo($defaultLocale);
+            function ($locale) use ($kernelDefaultLocale) {
+                return $locale->equalsTo($kernelDefaultLocale);
             }
         );
         $defaultLocale = reset($defaultLocale);

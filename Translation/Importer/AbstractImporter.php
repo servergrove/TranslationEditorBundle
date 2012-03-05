@@ -13,24 +13,8 @@ use ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface,
  *
  * @author Guilherme Blanco <guilhermeblanco@hotmail.com>
  */
-abstract class AbstractImporter extends ContainerAware
+abstract class AbstractImporter extends ContainerAware implements ImporterInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function importLocale($language, $country = null)
-    {
-        $storageService = $this->container->get('server_grove_translation_editor.storage');
-        $localeList     = $storageService->findLocaleList(array(
-            'language' => $language,
-            'country'  => $country
-        ));
-
-        return (count($localeList) === 1)
-            ? reset($localeList)
-            : $storageService->createLocale($language, $country);
-    }
-
     /**
      * Import an Entry
      *
@@ -77,5 +61,13 @@ abstract class AbstractImporter extends ContainerAware
         if ( ! count($translationList)) {
             $storageService->createTranslation($locale, $entry, $value);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function supports($filePath)
+    {
+        return $this->getFileExtension() === pathinfo($filePath, PATHINFO_EXTENSION);
     }
 }

@@ -204,10 +204,12 @@
 
 <h5>Stats</h5>
 
+{% if defaultLocale %}
 <ul>
     <li><a href="#" onclick="showEntryListAll()">Entries: {{ defaultLocale.getTranslations().count() }}</a></li>
     <li><a href="#" onclick="showEntryListMissing()">Missing translations</a></li>
 </ul>
+{% endif %}
 {% endblock %}
 
 {% block body %}
@@ -289,7 +291,7 @@
                         {% if translation %}{{ translation.getValue() }}{% endif %}
                     </div>
 
-                    {% if locale != defaultLocale and translation and translation.getValue() == defaultLocale.getTranslation(entry).getValue() %}
+                    {% if defaultLocale and locale != defaultLocale and translation and defaultLocale.getTranslation(entry) and translation.getValue() == defaultLocale.getTranslation(entry).getValue() %}
                         <span class="label warning">Duplicate</span>
                     {% endif %}
 

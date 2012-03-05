@@ -22,11 +22,6 @@
 
 
         <!-- Importer services -->
-
-        <service id="server_grove_translation_editor.importer" factory-method="get" factory-service="service_container" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Importer\ImporterInterface">
-            <argument>%server_grove_translation_editor.importer.type%</argument>
-        </service>
-
         <service id="server_grove_translation_editor.importer.xliff" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Importer\XliffImporter">
             <call method="setContainer">
                 <argument type="service" id="service_container"/>
@@ -39,6 +34,12 @@
             </call>
         </service>
 
+        <service id="server_grove_translation_editor.importer" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Importer\DelegatingImporter">
+            <argument id="server_grove_translation_editor.storage" type="service"/>
+            <call method="addImporter"><argument id="server_grove_translation_editor.importer.xliff" type="service"/></call>
+            <call method="addImporter"><argument id="server_grove_translation_editor.importer.yaml" type="service"/></call>
+        </service>
+
 
         <!-- Exporter services -->
 
@@ -47,6 +48,8 @@
         </service>
 
         <service id="server_grove_translation_editor.exporter.xliff" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Exporter\XliffExporter"/>
+
+        <service id="server_grove_translation_editor.exporter.yaml" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Exporter\YamlExporter"/>
 
     </services>
 </container>

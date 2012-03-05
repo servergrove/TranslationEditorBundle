@@ -13,15 +13,13 @@ use ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface;
  */
 interface ImporterInterface
 {
+
     /**
-     * Import the locale
+     * Retrieve the file extension
      *
-     * @param string $language
-     * @param string $country
-     *
-     * @return \ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface
+     * @return string
      */
-    public function importLocale($language, $country = null);
+    function getFileExtension();
 
     /**
      * Import the translation entries.
@@ -31,4 +29,14 @@ interface ImporterInterface
      * @param string $filePath
      */
     public function importFile(Bundle $bundle, LocaleInterface $locale, $filePath);
+
+    /**
+     * Return true if this importer can load this file
+     *
+     * @abstract
+     * @param $filePath
+     *
+     * @return boolean
+     */
+    public function supports($filePath);
 }

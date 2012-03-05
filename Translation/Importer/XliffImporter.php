@@ -16,6 +16,14 @@ class XliffImporter extends AbstractImporter implements ImporterInterface
     /**
      * {@inheritdoc}
      */
+    public function getFileExtension()
+    {
+        return 'xliff';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function importFile(Bundle $bundle, LocaleInterface $locale, $filePath)
     {
         // Extracting information

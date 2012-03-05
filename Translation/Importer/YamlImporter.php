@@ -12,8 +12,16 @@ use ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface;
  *
  * @author Guilherme Blanco <guilhermeblanco@hotmail.com>
  */
-class XliffImporter extends AbstractImporter implements ImporterInterface
+class YamlImporter extends AbstractImporter implements ImporterInterface
 {
+    /**
+     * {@inheritdoc}
+     */
+    public function getFileExtension()
+    {
+        return 'yml';
+    }
+
     /**
      * {@inheritdoc}
      */
