@@ -15,7 +15,7 @@
 
         <field name="value"
                column="value"
-               type="string"/>
+               type="text"/>
 
         <many-to-one target-entity="ServerGrove\Bundle\TranslationEditorBundle\Entity\Entry"
                      field="entry"
