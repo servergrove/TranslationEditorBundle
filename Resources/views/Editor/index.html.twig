@@ -295,7 +295,7 @@
                         <span class="label warning">Duplicate</span>
                     {% endif %}
 
-                    {% if not translation %}
+                    {% if not translation or translation.getValue() is empty %}
                         <span class="label important" onclick="showTranslationEditForm('{{loop.parent.loop.index}}-{{locale}}')">Missing</span>
                     {% endif %}
                 </div>
