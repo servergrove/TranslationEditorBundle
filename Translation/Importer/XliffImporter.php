@@ -3,6 +3,7 @@
 namespace ServerGrove\Bundle\TranslationEditorBundle\Translation\Importer;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Symfony\Component\HttpKernel\Kernel;
 
 use ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface;
 
@@ -10,6 +11,7 @@ use ServerGrove\Bundle\TranslationEditorBundle\Model\LocaleInterface;
  * XLIFF Importer
  *
  * @author Guilherme Blanco <guilhermeblanco@hotmail.com>
+ * @author Oleksii Strutsynkyi <cajoy1981@gmail.com>
  */
 class XliffImporter extends AbstractImporter implements ImporterInterface
 {
@@ -18,7 +20,7 @@ class XliffImporter extends AbstractImporter implements ImporterInterface
      */
     public function getFileExtension()
     {
-        return 'xliff';
+        return (version_compare(Kernel::VERSION, '2.1') >= 0) ? 'xlf' : 'xliff';
     }
 
     /**
