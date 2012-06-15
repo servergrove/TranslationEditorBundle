@@ -22,7 +22,7 @@ class EditorController extends Controller
         $kernelService  = $this->container->get('kernel');
 
         $sourcePath     = realpath($kernelService->getRootDir() . '/../src');
-        $kernelDefaultLocale  = $this->container->getParameter('session.default_locale');
+        $kernelDefaultLocale  = $this->getRequest()->getLocale();
 
         // Retrieving mandatory information
         $localeList = $storageService->findLocaleList();
