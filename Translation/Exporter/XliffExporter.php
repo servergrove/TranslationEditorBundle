@@ -3,6 +3,7 @@
 namespace ServerGrove\Bundle\TranslationEditorBundle\Translation\Exporter;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\HttpKernel\Kernel;
 
 use ServerGrove\Bundle\TranslationEditorBundle\Model\TranslationInterface;
 
