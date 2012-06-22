@@ -157,19 +157,26 @@ class ExportCommand extends AbstractCommand
     {
         $exporterService = $this->getContainer()->get('server_grove_translation_editor.exporter');
 
-        $fileExtension   = $exporterService->getFileExtension();
+        $fileExtensions  = $exporterService->getFileExtension();
         $localeString    = (string) $locale;
 
-        foreach ($translationFileList as $fileName => $translationList) {
-            // Generating file name
-            $fileName = sprintf('%s.%s.%s', $fileName, $localeString, $fileExtension);
-            $filePath = sprintf('%s/%s/%s', $bundle->getPath(), self::TRANSLATION_PATH, $fileName);
+        // In case that we need to support the legacy extensions, the file extensions can be an array.
+        if ( ! is_array($fileExtensions)) {
+            $fileExtensions = array($fileExtensions);
+        }
 
-            $this->output->write(sprintf('    Exporting "<info>%s</info>"... ', $fileName));
-
-            $exportResult = $exporterService->exportFile($filePath, $translationList);
-
-            $this->output->writeln($exportResult ? '<info>DONE</info>' : '<error>FAILED</error>');
+        foreach ($fileExtensions as $fileExtension) {
+            foreach ($translationFileList as $fileName => $translationList) {
+                // Generating file name
+                $fileName = sprintf('%s.%s.%s', $fileName, $localeString, $fileExtension);
+                $filePath = sprintf('%s/%s/%s', $bundle->getPath(), self::TRANSLATION_PATH, $fileName);
+    
+                $this->output->write(sprintf('    Exporting "<info>%s</info>"... ', $fileName));
+    
+                $exportResult = $exporterService->exportFile($filePath, $translationList);
+    
+                $this->output->writeln($exportResult ? '<info>DONE</info>' : '<error>FAILED</error>');
+            }
         }
     }
 
