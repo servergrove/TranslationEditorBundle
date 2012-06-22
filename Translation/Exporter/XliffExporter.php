@@ -37,7 +37,7 @@ class XliffExporter implements ExporterInterface
      */
     public function getFileExtension()
     {
-        return array('xlf', 'xliff');
+        return (version_compare(Kernel::VERSION, '2.1') >= 0) ? 'xlf' : 'xliff';
     }
 
     /**
