@@ -14,7 +14,7 @@ interface ExporterInterface
     /**
      * Retrieve the file extension
      *
-     * @return string
+     * @return string|array either a single string for a single extension or an array for multiple extensions for legacy support.
      */
     public function getFileExtension();
 
