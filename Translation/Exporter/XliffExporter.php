@@ -37,7 +37,7 @@ class XliffExporter implements ExporterInterface
      */
     public function getFileExtension()
     {
-        return 'xliff';
+        return array('xlf', 'xliff');
     }
 
     /**
