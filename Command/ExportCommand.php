@@ -160,6 +160,9 @@ class ExportCommand extends AbstractCommand
         $fileExtensions  = $exporterService->getFileExtension();
         $localeString    = (string) $locale;
 
+        // Debug code
+        var_dump($fileExtensions);
+
         // In case that we need to support the legacy extensions, the file extensions can be an array.
         if ( ! is_array($fileExtensions)) {
             $fileExtensions = array($fileExtensions);
