@@ -42,11 +42,11 @@ class ORMStorage extends AbstractStorage implements StorageInterface
      */
     public function findLocaleList(array $criteria = array())
     {
-        $repository = $this->manager->getRepository($this->getLocaleClassName());
-        $builder    = $repository->createQueryBuilder('l');
-
-        $builder->addSelect('t')->leftJoin('l.translations', 't')
-                ->addSelect('e')->leftJoin('t.entry', 'e');
+        $builder = $this->manager->createQueryBuilder();
+        $builder
+            ->select('l')->from($this->getLocaleClassName(), 'l')
+            ->addSelect('t')->leftJoin('l.translations', 't')
+            ->addSelect('e')->leftJoin('t.entry', 'e');
 
         $this->hydrateCriteria($builder, $criteria);
 
@@ -58,11 +58,11 @@ class ORMStorage extends AbstractStorage implements StorageInterface
      */
     public function findEntryList(array $criteria = array())
     {
-        $repository = $this->manager->getRepository($this->getEntryClassName());
-        $builder    = $repository->createQueryBuilder('e');
-
-        $builder->addSelect('t')->leftJoin('e.translations', 't')
-                ->addSelect('l')->leftJoin('t.locale', 'l');
+        $builder = $this->manager->createQueryBuilder();
+        $builder
+            ->select('e')->from($this->getEntryClassName(), 'e')
+            ->addSelect('t')->leftJoin('e.translations', 't')
+            ->addSelect('l')->leftJoin('t.locale', 'l');
 
         $this->hydrateCriteria($builder, $criteria);
 
@@ -74,11 +74,11 @@ class ORMStorage extends AbstractStorage implements StorageInterface
      */
     public function findTranslationList(array $criteria = array())
     {
-        $repository = $this->manager->getRepository($this->getTranslationClassName());
-        $builder    = $repository->createQueryBuilder('t');
-
-        $builder->addSelect('e')->leftJoin('t.entry', 'e')
-                ->addSelect('l')->leftJoin('t.locale', 'l');
+        $builder = $this->manager->createQueryBuilder();
+        $builder
+            ->select('t')->from($this->getTranslationClassName(), 't')
+            ->addSelect('e')->leftJoin('t.entry', 'e')
+            ->addSelect('l')->leftJoin('t.locale', 'l');
 
         $this->hydrateCriteria($builder, $criteria);
 
