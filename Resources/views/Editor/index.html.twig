@@ -1,0 +1,319 @@
+{% extends "ServerGroveTranslationEditorBundle::layout.html.twig" %}
+
+{% block sidebar %}
+<script>
+
+    function showEntryListAll()
+    {
+        var $zebraStripedTable = $('.zebra-striped');
+
+        $zebraStripedTable.find('tbody tr.ok').show();
+
+        // Update colors in remaining visible rows
+        $zebraStripedTable.removeClass('.zebra-striped')
+                          .addClass('.zebra-striped');
+    }
+
+    function showEntryListMissing()
+    {
+        var $zebraStripedTable = $('.zebra-striped');
+
+        $zebraStripedTable.find('tbody tr.ok').hide();
+
+        // Update colors in remaining visible rows
+        $zebraStripedTable.removeClass('.zebra-striped')
+                          .addClass('.zebra-striped');
+    }
+
+    function showTranslationEditForm(id)
+    {
+        $('#current-' + id).hide();
+        $('#editor-' + id).show();
+        $('#editor-' + id + ' textarea').focus();
+    }
+
+    function hideTranslationEditForm(id)
+    {
+        $('#current-' + id).show();
+        $('#editor-' + id).hide();
+    }
+
+    function saveTranslation(id, entryId, localeId)
+    {
+        $('#save-'+id).val('Saving...');
+
+        var newVal = $('#editor-' + id + ' textarea').val();
+
+        $.ajax({
+            type: "POST",
+            url: '{{path('sg_localeditor_update_translation')}}',
+            data: {
+                'entryId':  entryId,
+                'localeId': localeId,
+                'value':    newVal
+            },
+            success: function(data) {
+                var $currentContent = $('#current-' + id + '-content');
+
+                $('#save-' + id).val('Save');
+
+                $currentContent.html(newVal);
+                $currentContent.parent().find('.label').hide();
+
+                hideTranslationEditForm(id);
+            }
+        });
+    }
+
+    function removeEntry(id, entryId)
+    {
+        $('#remove-' + id).val('Removing...');
+
+        $.ajax({
+            type: "POST",
+            url: '{{path('sg_localeditor_remove_translation')}}',
+            data: {'id': entryId},
+            success: function(data) {
+                if (data.result) {
+                    $('#entry-' + id).remove();
+                } else {
+                    $('#remove-' + id).val('Failure');
+
+                    setTimeout(function () {
+                        $('#remove-' + id).val('Remove');
+                    }, 3000);
+                }
+            }
+        });
+    }
+
+    function saveEntryForm(form)
+    {
+        var url  = form.attr('action'),
+            data = form.serializeArray();
+
+        $('.alert-message').hide();
+
+        $.ajax({
+            url:      url,
+            dataType: 'json',
+            data:     data,
+            type:     'POST',
+            success: function(data) {
+                var message;
+
+                if (data && data.result) {
+                    form[0].reset();
+
+                    $('#newtranslation').hide();
+
+                    $('#insert-ok').html(data.message);
+                    $('#insert-ok').show();
+                } else {
+                    message = (data && data.message)
+                        ? ': ' + data.message
+                        : 'Unknown error';
+
+                    $('#errmsg').html(message);
+                    $('#insert-error').show();
+                }
+
+            }
+        });
+
+        return false;
+    }
+
+    function removeLocale(id, localeId)
+    {
+        $('#remove-locale-' + id).val('Removing...');
+
+        $.ajax({
+            type: "POST",
+            url: '{{path('sg_localeditor_remove_locale')}}',
+            data: {'id': localeId},
+            success: function(data) {
+                if (data.result) {
+                    $('#locale-' + id).remove();
+                } else {
+                    $('#remove-locale-' + id).val('Failure');
+
+                    setTimeout(function () {
+                        $('#remove=locale-' + id).val('Remove');
+                    }, 3000);
+                }
+            }
+        });
+    }
+
+    function saveLocaleForm(form)
+    {
+        var url  = form.attr('action'),
+            data = form.serializeArray();
+
+        $('.alert-message').hide();
+
+        $.ajax({
+            url:      url,
+            dataType: 'json',
+            data:     data,
+            type:     'POST',
+            success: function(data) {
+                var message;
+
+                if (data && data.result) {
+                    form[0].reset();
+
+                    $('#newlocale').hide();
+
+                    $('#insert-ok').html(data.message);
+                    $('#insert-ok').show();
+                } else {
+                    message = (data && data.message)
+                        ? ': ' + data.message
+                        : 'Unknown error';
+
+                    $('#errmsg').html(message);
+                    $('#insert-error').show();
+                }
+
+            }
+        });
+
+        return false;
+    }
+
+</script>
+
+<style>
+.editor {
+    display: none;
+}
+
+.editor textarea {
+    width: 100%;
+    min-width: 200px;
+    height: 100px;
+}
+
+.mysmall {
+    padding: 5px; width: 50px;
+    font-size: 9px;
+}
+</style>
+
+<h5>Stats</h5>
+
+{% if defaultLocale %}
+<ul>
+    <li><a href="#" onclick="showEntryListAll()">Entries: {{ defaultLocale.getTranslations().count() }}</a></li>
+    <li><a href="#" onclick="showEntryListMissing()">Missing translations</a></li>
+</ul>
+{% endif %}
+{% endblock %}
+
+{% block body %}
+<form id="newtranslation" style="display: none" method="POST" onsubmit="return saveEntryForm($('#newtranslation'))" action="{{path('sg_localeditor_add_translation')}}">
+    <label>Domain:</label>
+    <select id="domain" name="domain" style="width: 500px">
+    {% for bundle in bundleList %}
+        <option value="{{bundle.getName()}}">{{bundle.getName()}}</option>
+    {% endfor %}
+    </select>
+    <br/>
+
+    <label>File Name:</label>
+    <input type="text" id="fileName" name="fileName" style="width: 700px"/>
+    <br/>
+
+    <label>Alias:</label>
+    <input type="text" id="alias" name="alias" style="width: 700px"/>
+    <br/>
+
+    {% for locale in localeList %}
+    <label>{{ locale }}:</label>
+    <textarea name="translations[{{ locale.getId() }}]" style="width: 700px; height: 100px"></textarea>
+    <br/>
+    {% endfor %}
+
+    <input type="submit" value="Save" class="btn primary">
+    <input class="btn" type="button" value="Cancel" onclick="$('.alert-message').hide();$('#newtranslation').hide()">
+</form>
+
+<form id="newlocale" style="display: none" method="POST" onsubmit="return saveLocaleForm($('#newlocale'))" action="{{path('sg_localeditor_add_locale')}}">
+    <label>Language:</label>
+    <input type="text" id="language" name="language" maxlength="2" size="2"/>
+    <br />
+
+    <label>Country (optional):</label>
+    <input type="text" id="country" name="country" maxlength="2" size="2"/>
+    <br/>
+
+    <input type="submit" value="Save" class="btn primary">
+    <input class="btn" type="button" value="Cancel" onclick="$('.alert-message').hide();$('#newlocale').hide()">
+</form>
+
+<p id="insert-ok" class="alert-message success" style="display: none"></p>
+<p id="insert-error" class="alert-message error" style="display: none">An error ocurred while adding the translation<span id="errmsg"></span></p>
+
+<table class="zebra-striped">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Domain</th>
+            <th>Alias</th>
+
+            {% for locale in localeList %}
+            <th>{{locale}} {% if locale == defaultLocale %}<span class="label">Default</span>{%endif%}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+
+    {% set localeListCount = localeList|length %}
+
+    <tbody>
+        {% for entry in entryList %}
+        <tr id="entry-{{loop.index}}" {{ entry.getTranslations().count() != localeListCount ? 'class="missing"' : 'class="ok"' }}>
+            <td>
+                <input id="remove-{{loop.index}}" class=" btn danger mysmall" type="button" value="Remove" onclick="confirm('Are you sure?') && removeEntry('{{loop.index}}', '{{ entry.getId() }}')">
+            </td>
+
+            <td>{{ entry.getDomain() }}</td>
+
+            <td>{{ entry.getAlias() }}</td>
+
+            {% for locale in localeList %}
+            <td>
+                <div id="current-{{loop.parent.loop.index}}-{{locale}}">
+                    {% set translation = entry.getTranslation(locale) %}
+
+                    <div id="current-{{loop.parent.loop.index}}-{{locale}}-content" onclick="showTranslationEditForm('{{loop.parent.loop.index}}-{{locale}}')">
+                        {% if translation %}{{ translation.getValue() }}{% endif %}
+                    </div>
+
+                    {% if defaultLocale and locale != defaultLocale and translation and defaultLocale.getTranslation(entry) and translation.getValue() == defaultLocale.getTranslation(entry).getValue() %}
+                        <span class="label warning">Duplicate</span>
+                    {% endif %}
+
+                    {% if not translation or translation.getValue() is empty %}
+                        <span class="label important" onclick="showTranslationEditForm('{{loop.parent.loop.index}}-{{locale}}')">Missing</span>
+                    {% endif %}
+                </div>
+
+                <div id="editor-{{loop.parent.loop.index}}-{{locale}}" class="editor">
+                    <textarea>{% if translation %}{{ translation.getValue() }}{% endif %}</textarea>
+                    <br/>
+                    <input id="save-{{loop.parent.loop.index}}-{{locale}}"class="btn mysmall success" type="button" value="Save" onclick="saveTranslation('{{loop.parent.loop.index}}-{{locale}}', '{{entry.getId()}}', '{{locale.getId()}}')">
+                    <input class="btn mysmall" type="button" value="Cancel" onclick="hideTranslationEditForm('{{loop.parent.loop.index}}-{{locale}}')">
+                </div>
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<footer>
+    <p>&copy; ServerGrove 2012</p>
+</footer>
+{% endblock %}

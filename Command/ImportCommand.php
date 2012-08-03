@@ -2,140 +2,153 @@
 
 namespace ServerGrove\Bundle\TranslationEditorBundle\Command;
 
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Yaml\Parser;
+use Symfony\Component\Console\Input\InputArgument,
+    Symfony\Component\Console\Input\InputInterface,
+    Symfony\Component\Console\Input\InputOption,
+    Symfony\Component\Console\Output\OutputInterface,
+    Symfony\Component\Finder\Finder;
+
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Command for importing translation files
+ *
+ * @author Guilherme Blanco <guilhermeblanco@hotmail.com>
+ * @author Juti Noppornpitak <jnopporn@shiroyuki.com>
  */
-
-class ImportCommand extends Base
+class ImportCommand extends AbstractCommand
 {
-
+    /**
+     * {@inheritdoc}
+     */
     protected function configure()
     {
         parent::configure();
 
         $this
-        ->setName('locale:editor:import')
-        ->setDescription('Import translation files into MongoDB for using through /translations/editor')
-        ->addArgument('filename')
-        ->addOption("dry-run")
+            ->setName('locale:editor:import')
+            ->setDescription('Import translation files into sotrage for usage through Translation Editor GUI')
+            ->addOption('bundle', null, InputOption::VALUE_OPTIONAL, 'Allow to import a single bundle')
+            ->addOption('locale', null, InputOption::VALUE_OPTIONAL, 'Import to a single locale')
+            ->addOption('file', null, InputOption::VALUE_OPTIONAL, 'Restrict the importing to a single file')
         ;
-
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->input = $input;
+        $this->input  = $input;
         $this->output = $output;
 
-        $filename = $input->getArgument('filename');
+        // Bundles scanning
+        $this->output->write('Scanning for bundles... ');
 
-        $files = array();
+        $bundleList      = $this->getBundleList($this->input->getOption('bundle'));
+        $bundleListCount = count($bundleList);
 
-        if (!empty($filename) && is_dir($filename)) {
-            $output->writeln("Importing translations from <info>$filename</info>...");
-            $finder = new Finder();
-            $finder->files()->in($filename)->name('*');
+        $this->output->writeln(sprintf('found "<info>%s</info>" item(s).', $bundleListCount));
 
-            foreach ($finder as $file) {
-                $output->writeln("Found <info>".$file->getRealpath()."</info>...");
-                $files[] = $file->getRealpath();
-            }
+        if ( ! $bundleListCount) {
+            $this->output->writeln('No bundles to be processed.');
 
-        } else {
-            $dir = $this->getContainer()->getParameter('kernel.root_dir').'/../src';
-
-            $output->writeln("Scanning ".$dir."...");
-            $finder = new Finder();
-            $finder->directories()->in($dir)->name('translations');
-
-            foreach ($finder as $dir) {
-                $finder2 = new Finder();
-                $finder2->files()->in($dir->getRealpath())->name('*');
-                foreach ($finder2 as $file) {
-                    $output->writeln("Found <info>".$file->getRealpath()."</info>...");
-                    $files[] = $file->getRealpath();
-                }
-            }
-        }
-
-        if (!count($files)) {
-            $output->writeln("<error>No files found.</error>");
             return;
         }
-        $output->writeln(sprintf("Found %d files, importing...", count($files)));
-        
-        foreach($files as $filename) {
-            $this->import($filename);
+
+        // Importing Bundles
+        foreach ($bundleList as $bundle) {
+            $this->output->writeln('');
+            $this->output->writeln(sprintf('<comment>%s</comment>', $bundle->getName()));
+
+            $this->importBundle($bundle);
         }
 
+        $this->output->writeln('');
+        $this->output->writeln('Importing completed.');
     }
 
-    public function import($filename)
+    /**
+     * Import a Bundle
+     *
+     * @param \Symfony\Component\HttpKernel\Bundle\Bundle $bundle
+     */
+    protected function importBundle($bundle)
     {
-        $fname = basename($filename);
-        $this->output->writeln("Processing <info>".$filename."</info>...");
+        // Translation files scanning
+        $this->output->write('  Scanning for translation files... ');
 
-        list($name, $locale, $type) = explode('.', $fname);
+        $translationFileList = $this->getTranslationFileList(
+            $bundle,
+            $this->input->getOption('locale'),
+            $this->input->getOption('file')
+        );
+        $translationFileListCount = count($translationFileList);
 
-        $this->setIndexes();
+        $this->output->writeln(sprintf('found "<info>%s</info>" item(s).', $translationFileListCount));
 
-        switch($type) {
-            case 'yml':
-                $yaml = new Parser();
-                $value = $yaml->parse(file_get_contents($filename));
+        if ( ! $translationFileListCount) {
+            $this->output->writeln('  No translation files to be processed.');
 
-                $data = $this->getContainer()->get('server_grove_translation_editor.storage_manager')->getCollection()->findOne(array('filename'=>$filename));
-                if (!$data) {
-                    $data = array(
-                        'filename' => $filename,
-                        'locale' => $locale,
-                        'type' => $type,
-                        'entries' => array(),
-                    );
+            return;
+        }
 
-                }
+        // Importing files
+        $importerService = $this->getContainer()->get('server_grove_translation_editor.importer');
 
-                $this->output->writeln("  Found ".count($value)." entries...");
-                $data['entries'] = $value;
+        foreach ($translationFileList as $translationFilePath) {
+            $this->output->write(sprintf('  Processing "<info>%s</info>"... ', basename($translationFilePath)));
 
-                if (!$this->input->getOption('dry-run')) {
-                    $this->updateValue($data);
-                }
-                break;
-            case 'xliff':
-                $this->output->writeln("  Skipping, not implemented");
-                break;
+            list($name, $language, $country, $type) = $this->extractNameLocaleType($translationFilePath);
+
+            $locale = $importerService->importLocale($language, $country);
+            $importerService->importFile($bundle, $locale, $translationFilePath);
+
+            $this->output->writeln('<info>DONE</info>');
         }
     }
 
-    protected function setIndexes()
+    /**
+     * Retrieve the list of translation files of a given Bundle
+     *
+     * @param \Symfony\Component\HttpKernel\Bundle\Bundle $bundle
+     * @param string $filterLocaleName
+     * @param string $filterFileName
+     *
+     * @return array
+     */
+    protected function getTranslationFileList($bundle, $filterLocaleName = null, $filterFileName = null)
     {
-        $collection = $this->getContainer()->get('server_grove_translation_editor.storage_manager')->getCollection();
-        $collection->ensureIndex( array( "filename" => 1, 'locale' => 1 ) );
+        // Building translation directory
+        $translationPath = $bundle->getPath() . DIRECTORY_SEPARATOR . self::TRANSLATION_PATH;
+        $translationFiles = array();
+
+        // If directory not found, return
+        if ( ! file_exists($translationPath)) {
+            return $translationFiles;
+        }
+
+        $finder = new Finder();
+        $finder->files()->in($translationPath)->name('*');
+
+        foreach ($finder as $translationFile) {
+            $translationFilePath = $translationFile->getRealPath();
+
+            list($name, $language, $country, $type) = $this->extractNameLocaleType($translationFilePath);
+
+            // Ignore locale if no match
+            if ($filterLocaleName && $this->extractLocaleInformation($filterLocaleName) !== array($language, $country)) {
+                continue;
+            }
+
+            // Ignore file name if no match
+            if ($filterFileName && $name !== $filterFileName) {
+                continue;
+            }
+
+            $translationFiles[] = $translationFilePath;
+        }
+
+        return $translationFiles;
     }
-
-    protected function updateValue($data)
-    {
-        $collection = $collection = $this->getContainer()->get('server_grove_translation_editor.storage_manager')->getCollection();
-
-        $criteria = array(
-            'filename' => $data['filename'],
-        );
-
-        $mdata = array(
-            '$set' => $data,
-        );
-
-        return $collection->update($criteria, $data, array('upsert' => true));
-    }
-
 }
-
-

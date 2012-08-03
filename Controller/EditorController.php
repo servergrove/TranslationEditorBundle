@@ -2,163 +2,272 @@
 
 namespace ServerGrove\Bundle\TranslationEditorBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller,
+    Symfony\Component\HttpFoundation\RedirectResponse,
+    Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Editor Controller
+ */
 class EditorController extends Controller
 {
-    public function getCollection()
+    /**
+     * Index action
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function indexAction()
     {
-        return $this->container->get('server_grove_translation_editor.storage_manager')->getCollection();
-    }
+        $storageService = $this->container->get('server_grove_translation_editor.storage');
+        $kernelService  = $this->container->get('kernel');
 
-    public function listAction()
-    {
-        $data = $this->getCollection()->find();
+        $sourcePath     = realpath($kernelService->getRootDir() . '/../src');
+        $kernelDefaultLocale  = $this->getRequest()->getLocale();
 
-        $data->sort(array('locale' => 1));
+        // Retrieving mandatory information
+        $localeList = $storageService->findLocaleList();
+        $entryList  = $storageService->findEntryList();
 
-        $locales = array();
-
-        $default = $this->container->getParameter('locale', 'en');
-        $missing = array();
-
-        foreach ($data as $d) {
-            if (!isset($locales[$d['locale']])) {
-                $locales[$d['locale']] = array(
-                    'entries' => array(),
-                    'data'    => array()
-                );
+        // Processing registered bundles
+        $bundleList = array_filter(
+            $kernelService->getBundles(),
+            function ($bundle) use ($sourcePath) {
+                return (strpos($bundle->getPath(), $sourcePath) === 0);
             }
-            if (is_array($d['entries'])) {
-                $locales[$d['locale']]['entries'] = array_merge($locales[$d['locale']]['entries'], $d['entries']);
-                $locales[$d['locale']]['data'][$d['filename']] = $d;
+        );
+
+        // Processing default locale
+        $defaultLocale = array_filter(
+            $localeList,
+            function ($locale) use ($kernelDefaultLocale) {
+                return $locale->equalsTo($kernelDefaultLocale);
             }
-        }
+        );
+        $defaultLocale = reset($defaultLocale);
 
-        $keys = array_keys($locales);
-
-        foreach ($keys as $locale) {
-            if ($locale != $default) {
-                foreach ($locales[$default]['entries'] as $key => $val) {
-                    if (!isset($locales[$locale]['entries'][$key]) || $locales[$locale]['entries'][$key] == $key) {
-                        $missing[$key] = 1;
-                    }
-                }
-            }
-        }
-
-        return $this->render('ServerGroveTranslationEditorBundle:Editor:list.html.twig', array(
-                'locales' => $locales,
-                'default' => $default,
-                'missing' => $missing,
+        return $this->render(
+            'ServerGroveTranslationEditorBundle:Editor:index.html.twig',
+            array(
+                'bundleList'    => $bundleList,
+                'localeList'    => $localeList,
+                'entryList'     => $entryList,
+                'defaultLocale' => $defaultLocale,
             )
         );
     }
 
-    public function removeAction()
+    /**
+     * Remove Translation action
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function removeTranslationAction()
     {
-        $request = $this->getRequest();
+        $storageService = $this->container->get('server_grove_translation_editor.storage');
+        $request        = $this->getRequest();
 
-        if ($request->isXmlHttpRequest()) {
-            $key = $request->request->get('key');
-
-            $values = $this->getCollection()->find();
-
-            foreach($values as $data) {
-                if (isset($data['entries'][$key])) {
-                    unset($data['entries'][$key]);
-                    $this->updateData($data);
-                }
-            }
-
-            $res = array(
-                'result' => true,
-            );
-            return new \Symfony\Component\HttpFoundation\Response(json_encode($res));
+        if ( ! $request->isXmlHttpRequest()) {
+            return new RedirectResponse($this->generateUrl('sg_localeditor_index'));
         }
+
+        try {
+            $id     = $request->request->get('id');
+            $status = $storageService->deleteEntry($id);
+
+            $result = array(
+                'result' => $status
+            );
+        } catch (\Exception $e) {
+            $result = array(
+                'result'  => false,
+                'message' => $e->getMessage()
+            );
+        }
+
+        return new Response(json_encode($result), 200, array(
+            'Content-type' => 'application/json'
+        ));
     }
 
-    public function addAction()
+    /**
+     * Add Translation action
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function addTranslationAction()
     {
-        $request = $this->getRequest();
+        $storageService = $this->container->get('server_grove_translation_editor.storage');
+        $request        = $this->getRequest();
 
-        $locales = $request->request->get('locale');
-        $key = $request->request->get('key');
+        // Retrieve variables
+        $translations = $request->request->get('translations');
+        $fileName     = $request->request->get('fileName');
+        $domain       = $request->request->get('domain');
+        $alias        = $request->request->get('alias');
 
-        foreach($locales as $locale => $val ) {
-            $values = $this->getCollection()->find(array('locale' => $locale));
-            $values = iterator_to_array($values);
-            if (!count($values)) {
-                continue;
-            }
-            $found = false;
-            foreach ($values as $data) {
-                if (isset($data['entries'][$key])) {
-                    $res = array(
-                        'result' => false,
-                        'msg' => 'The key already exists. Please update it instead.',
-                    );
-                    return new \Symfony\Component\HttpFoundation\Response(json_encode($res));
-                }
-            }
+        // Check for existent domain/alias
+        $entryList =  $storageService->findEntryList(array(
+            'domain' => $domain,
+            'alias'  => $alias
+        ));
 
-            $data = array_pop($values);
-
-            $data['entries'][$key] = $val;
-
-            if (!$request->request->get('check-only')) {
-                $this->updateData($data);
-            }
-        }
-        if ($request->isXmlHttpRequest()) {
-            $res = array(
-                'result' => true,
+        if (count($entryList)) {
+            $result = array(
+                'result'  => false,
+                'message' => 'The alias already exists. Please update it instead.',
             );
-            return new \Symfony\Component\HttpFoundation\Response(json_encode($res));
+
+            return new Response(json_encode($result));
         }
 
-        return new \Symfony\Component\HttpFoundation\RedirectResponse($this->generateUrl('sg_localeditor_list'));
+        // Create new Entry
+        $entry = $storageService->createEntry($domain, $fileName, $alias);
+
+        // Create Translations
+        $translations = array_filter($translations);
+
+        foreach ($translations as $localeId => $translationValue) {
+            $locale = $storageService->findLocaleList(array('id' => $localeId));
+            $locale = reset($locale);
+
+            $storageService->createTranslation($locale, $entry, $translationValue);
+        }
+
+        // Return reponse according to request type
+        if ( ! $request->isXmlHttpRequest()) {
+            return new RedirectResponse($this->generateUrl('sg_localeditor_index'));
+        }
+
+        $result = array(
+            'result'  => true,
+            'message' => 'New translation added successfully. Reload list for completion.'
+        );
+
+        return new Response(json_encode($result));
     }
 
-    public function updateAction()
+    /**
+     * Update Translation action
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function updateTranslationAction()
     {
-        $request = $this->getRequest();
+        $storageService = $this->container->get('server_grove_translation_editor.storage');
+        $request        = $this->getRequest();
 
-        if ($request->isXmlHttpRequest()) {
-            $locale = $request->request->get('locale');
-            $key = $request->request->get('key');
-            $val = $request->request->get('val');
-
-            $values = $this->getCollection()->find(array('locale' => $locale));
-            $values = iterator_to_array($values);
-
-            $found = false;
-            foreach ($values as $data) {
-                if (isset($data['entries'][$key])) {
-                    $found = true;
-                    break;
-                }
-            }
-            if (!$found) {
-                $data = array_pop($values);
-            }
-
-            $data['entries'][$key] = $val;
-            $this->updateData($data);
-
-            $res = array(
-                'result' => true,
-                'oldata' => $data['entries'][$key],
-
-            );
-            return new \Symfony\Component\HttpFoundation\Response(json_encode($res));
+        if ( ! $request->isXmlHttpRequest()) {
+            return new RedirectResponse($this->generateUrl('sg_localeditor_index'));
         }
+
+        $value = $request->request->get('value');
+
+        $localeList = $storageService->findLocaleList(array('id' => $request->request->get('localeId')));
+        $locale     = reset($localeList);
+
+        $entryList  = $storageService->findEntryList(array('id' => $request->request->get('entryId')));
+        $entry      = reset($entryList);
+
+        $translationList = $storageService->findTranslationList(array('locale' => $locale, 'entry'  => $entry));
+        $translation     = reset($translationList);
+
+        try {
+            if ($translation) {
+                $translation->setValue($value);
+
+                $storageService->persist($translation);
+            } else {
+                $storageService->createTranslation($locale, $entry, $value);
+            }
+
+            $result = array(
+                'result'  => true,
+                'message' => 'Translation updated successfully.'
+            );
+        } catch (\Exception $e) {
+            $result = array(
+                'result'  => false,
+                'message' => $e->getMessage()
+            );
+        }
+
+        return new Response(json_encode($result), 200, array(
+            'Content-type' => 'application/json'
+        ));
     }
 
-    protected function updateData($data)
+    /**
+     * Remove Locale action
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function removeLocaleAction()
     {
-        $this->getCollection()->update(
-            array('_id' => $data['_id'])
-            , $data, array('upsert' => true));
+        $storageService = $this->container->get('server_grove_translation_editor.storage');
+        $request        = $this->getRequest();
+
+        if ( ! $request->isXmlHttpRequest()) {
+            return new RedirectResponse($this->generateUrl('sg_localeditor_index'));
+        }
+
+        try {
+            $id     = $request->request->get('id');
+            $status = $storageService->deleteLocale($id);
+
+            $result = array(
+                'result' => $status
+            );
+        } catch (\Exception $e) {
+            $result = array(
+                'result'  => false,
+                'message' => $e->getMessage()
+            );
+        }
+
+        return new Response(json_encode($result), 200, array(
+            'Content-type' => 'application/json'
+        ));
+    }
+
+    /**
+     * Add Locale action
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function addLocaleAction()
+    {
+        $storageService = $this->container->get('server_grove_translation_editor.storage');
+        $request        = $this->getRequest();
+
+        // Retrieve variables
+        $language = $request->request->get('language');
+        $country  = $request->request->get('country');
+
+        try {
+            // Check for country
+            $country = ( ! empty($country)) ? $country : null;
+
+            // Create new Locale
+            $storageService->createLocale($language, $country);
+
+            $result = array(
+                'result'  => true,
+                'message' => 'New locale added successfully. Reload list for completion.'
+            );
+        } catch (\Exception $e) {
+            $result = array(
+                'result'  => false,
+                'message' => $e->getMessage()
+            );
+        }
+
+        // Return reponse according to request type
+        if ( ! $request->isXmlHttpRequest()) {
+            return new RedirectResponse($this->generateUrl('sg_localeditor_index'));
+        }
+
+        return new Response(json_encode($result), 200, array(
+            'Content-type' => 'application/json'
+        ));
     }
 }
