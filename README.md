@@ -96,8 +96,6 @@ Add the routing configuration to app/config/routing_dev.yml
 
 ## TODO
 
-* Support for nested yml format
-* Support for xliff files
 * Import strings from twig files
 * Ability to edit key
 * Add Google Translate API interface

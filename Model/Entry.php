@@ -29,6 +29,11 @@ abstract class Entry implements EntryInterface
     /**
      * @var string
      */
+    protected $format;
+
+    /**
+     * @var string
+     */
     protected $alias;
 
     /**
@@ -85,6 +90,22 @@ abstract class Entry implements EntryInterface
     public function setFileName($fileName)
     {
         $this->fileName = $fileName;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getFormat()
+    {
+        return $this->format;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setFormat($format)
+    {
+        $this->format = $format;
     }
 
     /**

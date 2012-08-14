@@ -5,7 +5,8 @@ namespace ServerGrove\Bundle\TranslationEditorBundle\Command;
 use Symfony\Component\Console\Input\InputArgument,
     Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Input\InputOption,
-    Symfony\Component\Console\Output\OutputInterface;
+    Symfony\Component\Console\Output\OutputInterface,
+    Symfony\Component\Translation\MessageCatalogue;
 
 use Doctrine\Common\Collections\ArrayCollection;
 
@@ -155,21 +156,22 @@ class ExportCommand extends AbstractCommand
      */
     protected function exportTranslationFileList($bundle, $locale, ArrayCollection $translationFileList)
     {
-        $exporterService = $this->getContainer()->get('server_grove_translation_editor.exporter');
-
-        $fileExtension = $exporterService->getFileExtension();
-        $localeString  = (string) $locale;
+        $writer = $this->getContainer()->get('translation.writer');
 
         foreach ($translationFileList as $fileName => $translationList) {
-            // Generating file name
-            $fileName = sprintf('%s.%s.%s', $fileName, $localeString, $fileExtension);
             $filePath = sprintf('%s/%s/%s', $bundle->getPath(), self::TRANSLATION_PATH, $fileName);
 
             $this->output->write(sprintf('    Exporting "<info>%s</info>"... ', $fileName));
 
-            $exportResult = $exporterService->exportFile($filePath, $translationList);
+            $catalogue = new MessageCatalogue((string) $locale);
 
-            $this->output->writeln($exportResult ? '<info>DONE</info>' : '<error>FAILED</error>');
+            foreach ($translationList as $translation) {
+                $catalogue->set($translation->getEntry()->getAlias(), $translation->getValue(), $translation->getEntry()->getDomain());
+            }
+
+            $writer->writeTranslations($catalogue, $translation->getEntry()->getFormat(), array('path' => dirname($filePath)));
+
+            $this->output->writeln('<info>DONE</info>');
         }
     }
 

@@ -51,11 +51,12 @@ interface StorageInterface
      *
      * @param string $domain
      * @param string $fileName
+     * @param string $format
      * @param string $alias
      *
      * @return \ServerGrove\Bundle\TranslationEditorBundle\Model\EntryInterface
      */
-    public function createEntry($domain, $fileName, $alias);
+    public function createEntry($domain, $fileName, $format, $alias);
 
     /**
      * Delete an existing Entry
