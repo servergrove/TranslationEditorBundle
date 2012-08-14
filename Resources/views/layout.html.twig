@@ -7,15 +7,8 @@
         <meta name="description" content="">
         <meta name="author" content="">
 
-        <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
-        <!--[if lt IE 9]>
-            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-        <![endif]-->
-
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-
         <!-- Le styles -->
-        <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css">
+        <link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css">
 
         <style type="text/css">
             body {
@@ -23,16 +16,26 @@
             }
         </style>
 
+        <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap-responsive.css" rel="stylesheet">
+
+        <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+        <!--[if lt IE 9]>
+        <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
         <!-- Le fav and touch icons -->
-        <link rel="shortcut icon" href="images/favicon.ico">
-        <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-        <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
-        <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+        <link rel="shortcut icon" href="../assets/ico/favicon.ico">
+        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://twitter.github.com/bootstrap/assets/ico/apple-touch-icon-144-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" sizes="114x114" href="http://twitter.github.com/bootstrap/assets/assets/ico/apple-touch-icon-114-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" sizes="72x72" href="http://twitter.github.com/bootstrap/assets/assets/ico/apple-touch-icon-72-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" href="http://twitter.github.com/bootstrap/assets/assets/ico/apple-touch-icon-57-precomposed.png">
+
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     </head>
 
     <body>
-        <div class="topbar">
-            <div class="topbar-inner">
+        <div class="navbar navbar-fixed-top">
+            <div class="navbar-inner">
                 <div class="container-fluid">
                     <a class="brand" href="#">Symfony2 Translation Editor</a>
 
@@ -47,31 +50,35 @@
         </div>
 
         <div class="container-fluid">
-            <div class="sidebar">
-                <div class="well">
-                    <h5>Available Locales</h5>
+            <div class="row-fluid">
+                <div class="span3">
+                    <div class="well">
+                        <h5>Available Locales</h5>
 
-                    <ul style="padding: 0; margin: 0; list-style: none">
-                        {% for locale in localeList %}
-                        <li id="locale-{{loop.index}}" style="padding: 2px 0">
-                            <input id="remove-locale-{{loop.index}}" class=" btn danger mysmall" type="button" value="Remove" onclick="confirm('Are you sure?') && removeLocale('{{loop.index}}', '{{ locale.getId() }}')">
-                            {{locale}}
-                            {% if locale == defaultLocale %}<span class="label">Default</span>{%endif%}
-                        </li>
-                        {% endfor %}
-                    </ul>
+                        <ul style="padding: 0; margin: 0; list-style: none">
+                            {% for locale in localeList %}
+                            <li id="locale-{{loop.index}}" style="padding: 2px 0">
+                                <input id="remove-locale-{{loop.index}}" class=" btn btn-danger mysmall" type="button" value="Remove" onclick="confirm('Are you sure?') && removeLocale('{{loop.index}}', '{{ locale.getId() }}')">
+                                {{locale}}
+                                {% if locale == defaultLocale %}<span class="label">Default</span>{%endif%}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
 
                     {% block sidebar %}
                     {% endblock %}
                 </div>
-            </div>
 
-            <div class="content">
-                {% block body %}
-                {% endblock %}
+                <div class="span9">
+                    {% block body %}
+                    {% endblock %}
+                </div>
             </div>
+            <hr>
+            <footer>
+                <p>&copy; ServerGrove 2012</p>
+            </footer>
         </div>
-
     </body>
-
 </html>

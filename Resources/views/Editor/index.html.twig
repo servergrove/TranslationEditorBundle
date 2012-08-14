@@ -2,27 +2,26 @@
 
 {% block sidebar %}
 <script>
-
     function showEntryListAll()
     {
-        var $zebraStripedTable = $('.zebra-striped');
+        var $zebraStripedTable = $('.table-striped');
 
         $zebraStripedTable.find('tbody tr.ok').show();
 
         // Update colors in remaining visible rows
-        $zebraStripedTable.removeClass('.zebra-striped')
-                          .addClass('.zebra-striped');
+        $zebraStripedTable.removeClass('.table-striped')
+                          .addClass('.table-striped');
     }
 
     function showEntryListMissing()
     {
-        var $zebraStripedTable = $('.zebra-striped');
+        var $zebraStripedTable = $('.table-striped');
 
         $zebraStripedTable.find('tbody tr.ok').hide();
 
         // Update colors in remaining visible rows
-        $zebraStripedTable.removeClass('.zebra-striped')
-                          .addClass('.zebra-striped');
+        $zebraStripedTable.removeClass('.table-striped')
+                          .addClass('.table-striped');
     }
 
     function showTranslationEditForm(id)
@@ -92,7 +91,7 @@
         var url  = form.attr('action'),
             data = form.serializeArray();
 
-        $('.alert-message').hide();
+        $('.alert').hide();
 
         $.ajax({
             url:      url,
@@ -151,7 +150,7 @@
         var url  = form.attr('action'),
             data = form.serializeArray();
 
-        $('.alert-message').hide();
+        $('.alert').hide();
 
         $.ajax({
             url:      url,
@@ -236,8 +235,8 @@
     <br/>
     {% endfor %}
 
-    <input type="submit" value="Save" class="btn primary">
-    <input class="btn" type="button" value="Cancel" onclick="$('.alert-message').hide();$('#newtranslation').hide()">
+    <input type="submit" value="Save" class="btn btn-primary">
+    <input class="btn" type="button" value="Cancel" onclick="$('.alert').hide();$('#newtranslation').hide()">
 </form>
 
 <form id="newlocale" style="display: none" method="POST" onsubmit="return saveLocaleForm($('#newlocale'))" action="{{path('sg_localeditor_add_locale')}}">
@@ -249,14 +248,14 @@
     <input type="text" id="country" name="country" maxlength="2" size="2"/>
     <br/>
 
-    <input type="submit" value="Save" class="btn primary">
-    <input class="btn" type="button" value="Cancel" onclick="$('.alert-message').hide();$('#newlocale').hide()">
+    <input type="submit" value="Save" class="btn btn-primary">
+    <input class="btn" type="button" value="Cancel" onclick="$('.alert').hide();$('#newlocale').hide()">
 </form>
 
-<p id="insert-ok" class="alert-message success" style="display: none"></p>
-<p id="insert-error" class="alert-message error" style="display: none">An error ocurred while adding the translation<span id="errmsg"></span></p>
+<p id="insert-ok" class="alert alert-success" style="display: none"></p>
+<p id="insert-error" class="alert alert-error" style="display: none">An error ocurred while adding the translation<span id="errmsg"></span></p>
 
-<table class="zebra-striped">
+<table class="table table-striped">
     <thead>
         <tr>
             <th></th>
@@ -275,7 +274,7 @@
         {% for entry in entryList %}
         <tr id="entry-{{loop.index}}" {{ entry.getTranslations().count() != localeListCount ? 'class="missing"' : 'class="ok"' }}>
             <td>
-                <input id="remove-{{loop.index}}" class=" btn danger mysmall" type="button" value="Remove" onclick="confirm('Are you sure?') && removeEntry('{{loop.index}}', '{{ entry.getId() }}')">
+                <input id="remove-{{loop.index}}" class=" btn btn-danger mysmall" type="button" value="Remove" onclick="confirm('Are you sure?') && removeEntry('{{loop.index}}', '{{ entry.getId() }}')">
             </td>
 
             <td>{{ entry.getDomain() }}</td>
@@ -292,18 +291,18 @@
                     </div>
 
                     {% if defaultLocale and locale != defaultLocale and translation and defaultLocale.getTranslation(entry) and translation.getValue() == defaultLocale.getTranslation(entry).getValue() %}
-                        <span class="label warning">Duplicate</span>
+                        <span class="label label-warning">Duplicate</span>
                     {% endif %}
 
                     {% if not translation or translation.getValue() is empty %}
-                        <span class="label important" onclick="showTranslationEditForm('{{loop.parent.loop.index}}-{{locale}}')">Missing</span>
+                        <span class="label label-important" onclick="showTranslationEditForm('{{loop.parent.loop.index}}-{{locale}}')">Missing</span>
                     {% endif %}
                 </div>
 
                 <div id="editor-{{loop.parent.loop.index}}-{{locale}}" class="editor">
                     <textarea>{% if translation %}{{ translation.getValue() }}{% endif %}</textarea>
                     <br/>
-                    <input id="save-{{loop.parent.loop.index}}-{{locale}}"class="btn mysmall success" type="button" value="Save" onclick="saveTranslation('{{loop.parent.loop.index}}-{{locale}}', '{{entry.getId()}}', '{{locale.getId()}}')">
+                    <input id="save-{{loop.parent.loop.index}}-{{locale}}"class="btn mysmall btn-primary" type="button" value="Save" onclick="saveTranslation('{{loop.parent.loop.index}}-{{locale}}', '{{entry.getId()}}', '{{locale.getId()}}')">
                     <input class="btn mysmall" type="button" value="Cancel" onclick="hideTranslationEditForm('{{loop.parent.loop.index}}-{{locale}}')">
                 </div>
             </td>
@@ -312,8 +311,4 @@
         {% endfor %}
     </tbody>
 </table>
-
-<footer>
-    <p>&copy; ServerGrove 2012</p>
-</footer>
 {% endblock %}
