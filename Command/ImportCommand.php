@@ -57,7 +57,7 @@ class ImportCommand extends Base
 
             foreach ($finder as $dir) {
                 $finder2 = new Finder();
-                $finder2->files()->in($dir->getRealpath())->name('*');
+                $finder2->files()->in($dir->getRealpath())->name('/^[\w]+\.[\w]+\.(yml|xliff)$/');
                 foreach ($finder2 as $file) {
                     $output->writeln("Found <info>".$file->getRealpath()."</info>...");
                     $files[] = $file->getRealpath();
@@ -70,7 +70,7 @@ class ImportCommand extends Base
             return;
         }
         $output->writeln(sprintf("Found %d files, importing...", count($files)));
-        
+
         foreach($files as $filename) {
             $this->import($filename);
         }
