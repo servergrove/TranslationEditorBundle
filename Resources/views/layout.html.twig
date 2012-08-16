@@ -7,15 +7,8 @@
         <meta name="description" content="">
         <meta name="author" content="">
 
-        <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
-        <!--[if lt IE 9]>
-            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-        <![endif]-->
-
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-
         <!-- Le styles -->
-        <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css">
+        <link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css">
 
         <style type="text/css">
             body {
@@ -23,55 +16,102 @@
             }
         </style>
 
+        <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap-responsive.css" rel="stylesheet">
+
+        <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+        <!--[if lt IE 9]>
+        <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
         <!-- Le fav and touch icons -->
-        <link rel="shortcut icon" href="images/favicon.ico">
-        <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-        <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
-        <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+        <link rel="shortcut icon" href="../assets/ico/favicon.ico">
+        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://twitter.github.com/bootstrap/assets/ico/apple-touch-icon-144-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" sizes="114x114" href="http://twitter.github.com/bootstrap/assets/assets/ico/apple-touch-icon-114-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" sizes="72x72" href="http://twitter.github.com/bootstrap/assets/assets/ico/apple-touch-icon-72-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" href="http://twitter.github.com/bootstrap/assets/assets/ico/apple-touch-icon-57-precomposed.png">
+
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-collapse.js"></script>
     </head>
 
     <body>
-        <div class="topbar">
-            <div class="topbar-inner">
+        <div class="navbar navbar-fixed-top">
+            <div class="navbar-inner">
                 <div class="container-fluid">
+                    <a data-target=".nav-collapse" data-toggle="collapse" class="btn btn-navbar">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
                     <a class="brand" href="#">Symfony2 Translation Editor</a>
 
-                    <ul class="nav">
-                        <li><a href="#" onclick="$('.alert-message').hide();$('#newlocale').show();$('#language').focus()">New Locale</a></li>
-                        <li><a href="#" onclick="$('.alert-message').hide();$('#newtranslation').show();$('#domain').focus()">New Entry</a></li>
-                        <li><a href="#" onclick="this.innerHTML = 'Reloading...';window.location.reload()">Reload List</a></li>
-                        <li><a href="https://github.com/servergrove/TranslationEditorBundle">About</a></li>
-                    </ul>
+                    <div class="nav-collapse">
+                        <ul class="nav">
+                            <li><a href="#" id="nav-new-locale">New Locale</a></li>
+                            <li><a href="#" id="nav-new-entry">New Entry</a></li>
+                            <li><a href="#" id="nav-reload">Reload List</a></li>
+                            <li><a href="https://github.com/servergrove/TranslationEditorBundle">About</a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="container-fluid">
-            <div class="sidebar">
-                <div class="well">
-                    <h5>Available Locales</h5>
+            <div class="row-fluid">
+                <div class="span3">
+                    <div class="well">
+                        <h5>Available Locales</h5>
 
-                    <ul style="padding: 0; margin: 0; list-style: none">
-                        {% for locale in localeList %}
-                        <li id="locale-{{loop.index}}" style="padding: 2px 0">
-                            <input id="remove-locale-{{loop.index}}" class=" btn danger mysmall" type="button" value="Remove" onclick="confirm('Are you sure?') && removeLocale('{{loop.index}}', '{{ locale.getId() }}')">
-                            {{locale}}
-                            {% if locale == defaultLocale %}<span class="label">Default</span>{%endif%}
-                        </li>
-                        {% endfor %}
-                    </ul>
+                        <ul id="locales" style="padding: 0; margin: 0; list-style: none">
+                            {% for locale in localeList %}
+                            <li id="locale-{{loop.index}}" style="padding: 2px 0" data-id="{{ locale.getId() }}" data-index="{{loop.index}}">
+                                <input id="remove-locale-{{loop.index}}" class="btn btn-danger mysmall" type="button" value="Remove" />
+                                {{locale}}
+                                {% if locale == defaultLocale %}<span class="label">Default</span>{%endif%}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
 
                     {% block sidebar %}
                     {% endblock %}
                 </div>
-            </div>
 
-            <div class="content">
-                {% block body %}
-                {% endblock %}
+                <div class="span9">
+                    {% block body %}
+                    {% endblock %}
+                </div>
             </div>
+            <hr>
+            <footer>
+                <p>&copy; ServerGrove 2012</p>
+            </footer>
         </div>
 
+        <script>
+        $(document).ready(function () {
+            $('#locales input').click(function(e) {
+                var li = $(e.target).parent();
+                confirm('Are you sure?') && removeLocale(li.data('id'), li.data('index'));
+            });
+            $('#nav-new-locale').click(function() {
+                $('.alert-message').hide();
+                $('#newtranslation').hide();
+                var form = $('#newlocale').show();
+                $('#language', form).focus();
+            });
+            $('#nav-new-entry').click(function() {
+                $('.alert-message').hide();
+                $('#newlocale').hide();
+                var form = $('#newtranslation').show();
+                $('#domain', form).focus();
+            });
+            $('#nav-reload').click(function() {
+                this.innerHTML = 'Reloading...';
+                window.location.reload();
+            });
+        });
+        </script>
     </body>
-
 </html>
