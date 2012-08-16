@@ -6,7 +6,8 @@ use Symfony\Component\Console\Input\InputArgument,
     Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface,
-    Symfony\Component\Finder\Finder;
+    Symfony\Component\Finder\Finder,
+    Symfony\Component\Translation\MessageCatalogue;
 
 use Doctrine\Common\Collections\ArrayCollection;
 
@@ -94,15 +95,61 @@ class ImportCommand extends AbstractCommand
         }
 
         // Importing files
-        $importerService = $this->getContainer()->get('server_grove_translation_editor.importer');
-
-        foreach ($translationFileList as $translationFilePath) {
+        foreach ($translationFileList as $translationFilePath => $propertyList) {
             $this->output->write(sprintf('  Processing "<info>%s</info>"... ', basename($translationFilePath)));
 
-            list($name, $language, $country, $type) = $this->extractNameLocaleType($translationFilePath);
+            $storage = $this->getContainer()->get('server_grove_translation_editor.storage');
+            $loader  = $this->getContainer()->get('translation.loader');
 
-            $locale = $importerService->importLocale($language, $country);
-            $importerService->importFile($bundle, $locale, $translationFilePath);
+            // Get or create locale
+            $localeList = $storage->findLocaleList(array(
+                'language' => $propertyList['language'],
+                'country'  => $propertyList['country']
+            ));
+
+            if (null === $locale = array_shift($localeList)) {
+                $locale = $storage->createLocale($propertyList['language'], $propertyList['country']);
+            }
+
+            // Import translation
+            $entryList = $storage->findEntryList(array(
+                'domain'   => $bundle->getName(),
+                'fileName' => $propertyList['name']
+            ));
+
+            $catalogue = new MessageCatalogue($locale);
+
+            $loader->loadMessages(dirname($translationFilePath), $catalogue);
+
+            foreach ($catalogue->all($propertyList['name']) as $alias => $value) {
+                // Get or create entry
+                $entryListFiltered = array_filter(
+                    $entryList,
+                    function ($entry) use ($alias) {
+                        return ($alias === $entry->getAlias());
+                    }
+                );
+
+                if (null === $entry = array_shift($entryListFiltered)) {
+                    $entry = $storage->createEntry(
+                        $bundle->getName(),
+                        $propertyList['name'],
+                        pathinfo($translationFilePath, PATHINFO_EXTENSION),
+                        $alias
+                    );
+                }
+
+                // Get or create translation
+                $translationList = $entry->getTranslations()->filter(
+                    function ($translation) use ($locale) {
+                        return ($translation->getLocale() === $locale);
+                    }
+                );
+
+                if (0 === count($translationList)) {
+                    $storage->createTranslation($locale, $entry, $value);
+                }
+            }
 
             $this->output->writeln('<info>DONE</info>');
         }
@@ -129,7 +176,7 @@ class ImportCommand extends AbstractCommand
         }
 
         $finder = new Finder();
-        $finder->files()->in($translationPath)->name('*');
+        $finder->files()->in($translationPath)->name('/^[\w]+\.[a-z_]{2,7}\.[a-z]{2,5}$/');
 
         foreach ($finder as $translationFile) {
             $translationFilePath = $translationFile->getRealPath();
@@ -146,7 +193,12 @@ class ImportCommand extends AbstractCommand
                 continue;
             }
 
-            $translationFiles[] = $translationFilePath;
+            $translationFiles[$translationFilePath] = array(
+                'name'     => $name,
+                'language' => $language,
+                'country'  => $country,
+                'type'     => $type
+            );
         }
 
         return $translationFiles;

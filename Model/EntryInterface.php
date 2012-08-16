@@ -38,6 +38,20 @@ interface EntryInterface
     public function setFileName($fileName);
 
     /**
+     * Retrieve the Entry format
+     *
+     * @return string
+     */
+    public function getFormat();
+
+    /**
+     * Define the Entry format
+     *
+     * @param string $format
+     */
+    public function setFormat($format);
+
+    /**
      * Retrieve the Entry alias
      *
      * @return string

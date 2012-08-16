@@ -7,7 +7,6 @@
     <services>
 
         <!-- Storage services -->
-
         <service id="server_grove_translation_editor.storage" factory-method="get" factory-service="service_container" class="ServerGrove\Bundle\TranslationEditorBundle\Storage\StorageInterface">
             <argument>%server_grove_translation_editor.storage.type%</argument>
         </service>
@@ -19,37 +18,6 @@
         <service id="server_grove_translation_editor.storage.manager" factory-method="get" factory-service="service_container" class="Doctrine\Common\Persistence\ObjectManager" public="false">
             <argument>%server_grove_translation_editor.storage.manager%</argument>
         </service>
-
-
-        <!-- Importer services -->
-        <service id="server_grove_translation_editor.importer.xliff" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Importer\XliffImporter">
-            <call method="setContainer">
-                <argument type="service" id="service_container"/>
-            </call>
-        </service>
-
-        <service id="server_grove_translation_editor.importer.yaml" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Importer\YamlImporter">
-            <call method="setContainer">
-                <argument type="service" id="service_container"/>
-            </call>
-        </service>
-
-        <service id="server_grove_translation_editor.importer" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Importer\DelegatingImporter">
-            <argument id="server_grove_translation_editor.storage" type="service"/>
-            <call method="addImporter"><argument id="server_grove_translation_editor.importer.xliff" type="service"/></call>
-            <call method="addImporter"><argument id="server_grove_translation_editor.importer.yaml" type="service"/></call>
-        </service>
-
-
-        <!-- Exporter services -->
-
-        <service id="server_grove_translation_editor.exporter" factory-method="get" factory-service="service_container" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Exporter\ExporterInterface">
-            <argument>%server_grove_translation_editor.exporter.type%</argument>
-        </service>
-
-        <service id="server_grove_translation_editor.exporter.xliff" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Exporter\XliffExporter"/>
-
-        <service id="server_grove_translation_editor.exporter.yaml" class="ServerGrove\Bundle\TranslationEditorBundle\Translation\Exporter\YamlExporter"/>
 
     </services>
 </container>

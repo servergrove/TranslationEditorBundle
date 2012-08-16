@@ -44,13 +44,14 @@ abstract class AbstractStorage
     /**
      * {@inheritdoc}
      */
-    public function createEntry($domain, $fileName, $alias)
+    public function createEntry($domain, $fileName, $format, $alias)
     {
         $entryClass = $this->getEntryClassName();
         $entry      = new $entryClass;
 
         $entry->setDomain($domain);
         $entry->setFileName($fileName);
+        $entry->setFormat($format);
         $entry->setAlias($alias);
 
         return $this->persist($entry);

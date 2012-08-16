@@ -23,6 +23,11 @@
                type="string"
                length="50"/>
 
+        <field name="format"
+               column="format"
+               type="string"
+               length="5"/>
+
         <field name="alias"
                column="alias"
                type="string"/>
