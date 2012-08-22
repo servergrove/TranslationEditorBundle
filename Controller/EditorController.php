@@ -100,10 +100,13 @@ class EditorController extends Controller
         $request        = $this->getRequest();
 
         // Retrieve variables
-        $translations = $request->request->get('translations');
-        $fileName     = $request->request->get('fileName');
-        $domain       = $request->request->get('domain');
-        $alias        = $request->request->get('alias');
+        $rawTranslations = $request->request->get('translations');
+        $domain          = $request->request->get('domain');
+        $alias           = $request->request->get('alias');
+
+        $rawFileName  = $request->request->get('fileName');
+        $fileName     = pathinfo($rawFileName, PATHINFO_FILENAME);
+        $format       = pathinfo($rawFileName, PATHINFO_EXTENSION);
 
         // Check for existent domain/alias
         $entryList =  $storageService->findEntryList(array(
@@ -121,10 +124,10 @@ class EditorController extends Controller
         }
 
         // Create new Entry
-        $entry = $storageService->createEntry($domain, $fileName, $alias);
+        $entry = $storageService->createEntry($domain, $fileName, $format, $alias);
 
         // Create Translations
-        $translations = array_filter($translations);
+        $translations = array_filter($rawTranslations);
 
         foreach ($translations as $localeId => $translationValue) {
             $locale = $storageService->findLocaleList(array('id' => $localeId));
