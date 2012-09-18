@@ -28,7 +28,7 @@ class ImportCommand extends AbstractCommand
 
         $this
             ->setName('locale:editor:import')
-            ->setDescription('Import translation files into sotrage for usage through Translation Editor GUI')
+            ->setDescription('Import translation files into storage for usage through Translation Editor GUI')
             ->addOption('bundle', null, InputOption::VALUE_OPTIONAL, 'Allow to import a single bundle')
             ->addOption('locale', null, InputOption::VALUE_OPTIONAL, 'Import to a single locale')
             ->addOption('file', null, InputOption::VALUE_OPTIONAL, 'Restrict the importing to a single file')
