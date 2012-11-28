@@ -35,15 +35,6 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
-                ->arrayNode('exporter')
-                    ->children()
-                        ->scalarNode('type')
-                            ->cannotBeOverwritten()
-                            ->isRequired()
-                            ->cannotBeEmpty()
-                        ->end()
-                    ->end()
-                ->end()
             ->end();
 
         return $treeBuilder;
