@@ -67,8 +67,6 @@ A sample configuration (in your config_dev.yml):
       storage:
         type: server_grove_translation_editor.storage.orm
         manager: doctrine.orm.entity_manager
-      exporter:
-        type: server_grove_translation_editor.exporter.yaml
 
 Add the routing configuration to app/config/routing_dev.yml
 
