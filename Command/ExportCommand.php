@@ -166,7 +166,7 @@ class ExportCommand extends AbstractCommand
             $catalogue = new MessageCatalogue((string) $locale);
 
             foreach ($translationList as $translation) {
-                $catalogue->set($translation->getEntry()->getAlias(), $translation->getValue(), $translation->getEntry()->getDomain());
+                $catalogue->set($translation->getEntry()->getAlias(), $translation->getValue(), $translation->getEntry()->getFilename());
             }
 
             $writer->writeTranslations($catalogue, $translation->getEntry()->getFormat(), array('path' => dirname($filePath)));
