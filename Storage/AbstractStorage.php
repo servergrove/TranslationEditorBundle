@@ -102,9 +102,17 @@ abstract class AbstractStorage
     public function persist($entity)
     {
         $this->manager->persist($entity);
-        $this->manager->flush();
 
         return $entity;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function flushAll()
+    {
+        $this->manager->flush();
+        $this->manager->clear();
     }
 
     /**
