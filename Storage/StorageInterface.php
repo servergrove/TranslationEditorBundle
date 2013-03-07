@@ -104,4 +104,9 @@ interface StorageInterface
      * @return object
      */
     public function persist($entity);
+
+    /**
+     * Flushes all persisted entities, and clear the object manager
+     */
+    public function flushAll();
 }
