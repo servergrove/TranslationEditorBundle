@@ -1,7 +1,7 @@
 {
     "name": "instaclick/translation-editor-bundle",
-    "description": "Web based UI to manage Symfony2 translations",
-    "keywords": ["symfony2", "translations", "locale", "editor"],
+    "description": "Web editor UI to manage Symfony2 translations (Symfony2 bundle)",
+    "keywords": ["symfony2", "translate", "translation", "translations", "locale", "editor", "i18n", "multilanguage", "import", "export", "extract"],
     "homepage": "http://github.com/instaclick/TranslationEditorBundle",
     "type": "symfony-bundle",
     "license": "MIT",
