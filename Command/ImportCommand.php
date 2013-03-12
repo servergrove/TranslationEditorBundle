@@ -151,7 +151,8 @@ class ImportCommand extends AbstractCommand
                 }
             }
 
-            $storage->flushAll();
+            $storage->flush();
+            $storage->clear();
 
             $this->output->writeln('<info>DONE</info>');
         }
