@@ -93,7 +93,7 @@
         $(document).ready(function () {
             $('#locales input').click(function(e) {
                 var li = $(e.target).parent();
-                confirm('Are you sure?') && removeLocale(li.data('id'), li.data('index'));
+                confirm('Are you sure?') && removeLocale(li.data('index'), li.data('id'));
             });
             $('#nav-new-locale').click(function() {
                 $('.alert-message').hide();
