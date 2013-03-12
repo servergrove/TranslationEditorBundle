@@ -136,6 +136,8 @@ class EditorController extends Controller
             $storageService->createTranslation($locale, $entry, $translationValue);
         }
 
+        $storageService->flush();
+
         // Return reponse according to request type
         if ( ! $request->isXmlHttpRequest()) {
             return new RedirectResponse($this->generateUrl('sg_localeditor_index'));
@@ -182,6 +184,8 @@ class EditorController extends Controller
             } else {
                 $storageService->createTranslation($locale, $entry, $value);
             }
+
+            $storageService->flush();
 
             $result = array(
                 'result'  => true,
@@ -252,6 +256,8 @@ class EditorController extends Controller
 
             // Create new Locale
             $storageService->createLocale($language, $country);
+
+            $storageService->flush();
 
             $result = array(
                 'result'  => true,

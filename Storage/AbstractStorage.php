@@ -109,9 +109,16 @@ abstract class AbstractStorage
     /**
      * {@inheritdoc}
      */
-    public function flushAll()
+    public function flush()
     {
         $this->manager->flush();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function clear()
+    {
         $this->manager->clear();
     }
 

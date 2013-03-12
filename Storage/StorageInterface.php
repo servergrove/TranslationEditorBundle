@@ -106,7 +106,12 @@ interface StorageInterface
     public function persist($entity);
 
     /**
-     * Flushes all persisted entities, and clear the object manager
+     * Flushes all persisted entities
      */
-    public function flushAll();
+    public function flush();
+
+    /**
+     * Clear all managed entities in the object manager
+     */
+    public function clear();
 }
