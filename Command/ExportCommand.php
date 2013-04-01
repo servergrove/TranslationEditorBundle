@@ -119,8 +119,8 @@ class ExportCommand extends Base
 
             		$unit = $body->addChild('trans-unit');
             		$unit->addAttribute("id", ++$i);
-            		$unit->addChild("source", $source);
-            		$unit->addChild("target", $target);
+                    $unit->source = $source;
+                    $Unit->target = $target;
             	}
 
             	$result = $xml->asXML();
