@@ -120,7 +120,7 @@ class ExportCommand extends Base
             		$unit = $body->addChild('trans-unit');
             		$unit->addAttribute("id", ++$i);
                     $unit->source = $source;
-                    $Unit->target = $target;
+                    $unit->target = $target;
             	}
 
             	$result = $xml->asXML();
