@@ -5,7 +5,7 @@
     "homepage": "http://github.com/instaclick/TranslationEditorBundle",
     "type": "symfony-bundle",
     "license": "MIT",
-    "version": "1.0.4",
+    "version": "1.0.0",
     "authors": [
         {
             "name": "Guilherme Blanco",
