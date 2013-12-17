@@ -122,6 +122,11 @@ class ImportCommand extends AbstractCommand
             $loader->loadMessages(dirname($translationFilePath), $catalogue);
 
             foreach ($catalogue->all($propertyList['name']) as $alias => $value) {
+                // Avoid error on empty value
+                if($value === null) {
+                    $this->output->writeln("\n    <error>Warning: Empty value on ".$alias."</error>" );
+                    continue;
+                }
                 // Get or create entry
                 $entryListFiltered = array_filter(
                     $entryList,
