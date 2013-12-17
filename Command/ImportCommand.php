@@ -122,6 +122,11 @@ class ImportCommand extends AbstractCommand
             $loader->loadMessages(dirname($translationFilePath), $catalogue);
 
             foreach ($catalogue->all($propertyList['name']) as $alias => $value) {
+                // Avoid error on empty value
+                if($value === null) {
+                    $this->output->writeln("\n    <error>Warning: Empty value on ".$alias."</error>" );
+                    continue;
+                }
                 // Get or create entry
                 $entryListFiltered = array_filter(
                     $entryList,
@@ -179,7 +184,7 @@ class ImportCommand extends AbstractCommand
         }
 
         $finder = new Finder();
-        $finder->files()->in($translationPath)->name('/^.+\.[a-z_]{2,7}\.[a-z]{2,5}$/');
+        $finder->files()->in($translationPath)->name('/^.+\.[a-zA-Z_]{2,7}\.[a-z]{2,5}$/');
 
         foreach ($finder as $translationFile) {
             $translationFilePath = $translationFile->getRealPath();
