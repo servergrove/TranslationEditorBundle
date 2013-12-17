@@ -1,6 +1,7 @@
 {% extends "ServerGroveTranslationEditorBundle::layout.html.twig" %}
 
 {% block sidebar %}
+
 <script>
     function showEntryListAll()
     {
@@ -201,57 +202,72 @@
 }
 </style>
 
-<h5>Stats</h5>
+    <div class="panel panel-info">
+        <div class="panel-heading">Stats</div>
+    {% if defaultLocale %}
+        <div class="list-groput">
+            <a href="#" onclick="showEntryListAll()" class="list-group-item">Entries: <span class="badge">{{ defaultLocale.getTranslations().count() }}</span></a>
+            <a href="#" onclick="showEntryListMissing()" class="list-group-item">Missing translations</a>
+        </div>
+    {% endif %}
 
-{% if defaultLocale %}
-<ul>
-    <li><a href="#" onclick="showEntryListAll()">Entries: {{ defaultLocale.getTranslations().count() }}</a></li>
-    <li><a href="#" onclick="showEntryListMissing()">Missing translations</a></li>
-</ul>
-{% endif %}
 {% endblock %}
 
 {% block body %}
-<form id="newtranslation" style="display: none" method="POST" onsubmit="return saveEntryForm($('#newtranslation'))" action="{{path('sg_localeditor_add_translation')}}">
-    <label>Domain:</label>
-    <select id="domain" name="domain" style="width: 500px">
-    {% for bundle in bundleList %}
-        <option value="{{bundle.getName()}}">{{bundle.getName()}}</option>
-    {% endfor %}
-    </select>
-    <br/>
+<div class="panel panel-success panel-top-form" id="newtranslation" style="display: none" >
+    <div class="panel-heading">New Entry</div>
+    <div class="panel-body">
+        <form method="POST"  style="display:none" onsubmit="return saveEntryForm($('#newtranslation'))" action="{{path('sg_localeditor_add_translation')}}">
+            <div class="form-group input-group">
+                <label class="input-group-addon">Domain:</label>
+                <select id="domain" name="domain" class="form-control"/>
+                {% for bundle in bundleList %}
+                    <option value="{{bundle.getName()}}">{{bundle.getName()}}</option>
+                {% endfor %}
+                </select>
+            </div>
+            <div class="form-group input-group">
+                <label class="input-group-addon">File Name:</label>
+                <input type="text" id="fileName" name="fileName" class="form-control"/>
+            </div>
+            <div class="form-group input-group">    
+                <label class="input-group-addon">Alias:</label>
+                <input type="text" id="alias" name="alias" class="form-control"/>
+            </div>
 
-    <label>File Name:</label>
-    <input type="text" id="fileName" name="fileName" style="width: 700px"/>
-    <br/>
+            {% for locale in localeList %}
+            <div class="form-group input-group">    
+                <label class="input-group-addon">{{ locale }}:</label>
+                <textarea name="translations[{{ locale.getId() }}]" style="" class="form-control"></textarea>
+            </div>
+            {% endfor %}
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-ok"></i> &nbsp;Save</button>
+                <a class="btn btn-danger cancel-top-form"><i class="glyphicon glyphicon-remove"></i> &nbsp;Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
 
-    <label>Alias:</label>
-    <input type="text" id="alias" name="alias" style="width: 700px"/>
-    <br/>
-
-    {% for locale in localeList %}
-    <label>{{ locale }}:</label>
-    <textarea name="translations[{{ locale.getId() }}]" style="width: 700px; height: 100px"></textarea>
-    <br/>
-    {% endfor %}
-
-    <input type="submit" value="Save" class="btn btn-primary">
-    <input class="btn" type="button" value="Cancel" onclick="$('.alert').hide();$('#newtranslation').hide()">
-</form>
-
-<form id="newlocale" style="display: none" method="POST" onsubmit="return saveLocaleForm($('#newlocale'))" action="{{path('sg_localeditor_add_locale')}}">
-    <label>Language:</label>
-    <input type="text" id="language" name="language" maxlength="2" size="2"/>
-    <br />
-
-    <label>Country (optional):</label>
-    <input type="text" id="country" name="country" maxlength="2" size="2"/>
-    <br/>
-
-    <input type="submit" value="Save" class="btn btn-primary">
-    <input class="btn" type="button" value="Cancel" onclick="$('.alert').hide();$('#newlocale').hide()">
-</form>
-
+<div class="panel panel-success panel-top-form" id="newlocale" style="display: none" >
+    <div class="panel-heading">New Locale</div>
+    <div class="panel-body">
+        <form method="POST" style="display:none" onsubmit="return saveLocaleForm($('#newlocale'))" action="{{path('sg_localeditor_add_locale')}}">
+            <div class="form-group input-group">
+                <label class="input-group-addon">Language:</label>
+                <input type="text" id="language" name="language" maxlength="2" size="2" class="form-control"/>
+            </div>
+            <div class="form-group input-group">
+                <label class="input-group-addon">Country (optional):</label>
+                <input type="text" id="country" name="country" maxlength="2" size="2" class="form-control"/>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-ok"></i> &nbsp;Save</button>
+                <a class="btn btn-danger cancel-top-form"><i class="glyphicon glyphicon-remove"></i> &nbsp;Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
 <p id="insert-ok" class="alert alert-success" style="display: none"></p>
 <p id="insert-error" class="alert alert-error" style="display: none">An error ocurred while adding the translation<span id="errmsg"></span></p>
 
@@ -274,7 +290,7 @@
         {% for entry in entryList %}
         <tr id="entry-{{loop.index}}" {{ entry.getTranslations().count() != localeListCount ? 'class="missing"' : 'class="ok"' }}>
             <td>
-                <input id="remove-{{loop.index}}" class=" btn btn-danger mysmall" type="button" value="Remove" onclick="confirm('Are you sure?') && removeEntry('{{loop.index}}', '{{ entry.getId() }}')">
+                <input id="remove-{{loop.index}}" class=" btn btn-danger mysmall" type="button" value="X" title="Remove" onclick="confirm('Are you sure?') && removeEntry('{{loop.index}}', '{{ entry.getId() }}')">
             </td>
 
             <td>{{ entry.getDomain() }}</td>
@@ -295,7 +311,7 @@
                     {% endif %}
 
                     {% if not translation or translation.getValue() is empty %}
-                        <span class="label label-important" onclick="showTranslationEditForm('{{loop.parent.loop.index}}-{{locale}}')">Missing</span>
+                        <span class="label label-danger" onclick="showTranslationEditForm('{{loop.parent.loop.index}}-{{locale}}')">Missing</span>
                     {% endif %}
                 </div>
 

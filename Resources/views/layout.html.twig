@@ -8,19 +8,16 @@
         <meta name="author" content="">
 
         <!-- Le styles -->
-        <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css">
-
-        <style type="text/css">
-            body {
-                padding-top: 60px;
-            }
-        </style>
+        <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
 
         <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
         <!--[if lt IE 9]>
         <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
-
+        <style>
+            body { padding-top: 70px; }
+            .navbar {box-shadow: 0 0 5px #CBCBCB;}
+        </style>
         <!-- Le fav and touch icons -->
         <link rel="shortcut icon" href="../assets/ico/favicon.ico">
         <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://twitter.github.com/bootstrap/assets/ico/apple-touch-icon-144-precomposed.png">
@@ -29,60 +26,68 @@
         <link rel="apple-touch-icon-precomposed" href="http://twitter.github.com/bootstrap/assets/assets/ico/apple-touch-icon-57-precomposed.png">
 
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-        <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
     </head>
 
     <body>
-        <div class="navbar navbar-fixed-top">
-            <div class="navbar-inner">
-                <div class="container-fluid">
-                    <a data-target=".nav-collapse" data-toggle="collapse" class="btn btn-navbar">
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </a>
-                    <a class="brand" href="#">Symfony2 Translation Editor</a>
+        <!-- Navigation top bar -->
+        <nav class="navbar navbar-default navbar-fixed-top col-sm-12" role="navigation">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#nav-collapse">
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">SF2 Translation Editor</a>
+            </div>
+            <div class="collapse navbar-collapse" id="nav-collapse">
+                <ul class="nav navbar-nav">
+                  <li><a href="#" id="nav-new-locale">New Locale</a></li>
+                  <li><a href="#" id="nav-new-entry">New Entry</a></li>
+                  <li><a href="#" id="nav-reload">Reload List</a></li>
+                </ul>
+                <form class="navbar-form navbar-left" role="search">
+                  <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Search Alias or Value">
+                  </div>
+                  <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i> &nbsp;Send</button>
+                </form>
+                <ul class="nav navbar-nav navbar-right">
+                  <li><a href="https://github.com/servergrove/TranslationEditorBundle">About</a></li>
+                </ul>
+            </div>
+        </nav>
 
-                    <div class="nav-collapse">
-                        <ul class="nav">
-                            <li><a href="#" id="nav-new-locale">New Locale</a></li>
-                            <li><a href="#" id="nav-new-entry">New Entry</a></li>
-                            <li><a href="#" id="nav-reload">Reload List</a></li>
-                            <li><a href="https://github.com/servergrove/TranslationEditorBundle">About</a></li>
-                        </ul>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-2">
+                    <div style="position:fixed">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">Available Locales</div>
+                        <div class="">
+                            <ul id="locales" style="padding: 0; margin: 0; list-style: none" class="list-group">
+                                {% for locale in localeList %}
+                                <li id="locale-{{loop.index}}" data-id="{{ locale.getId() }}" data-index="{{loop.index}}" class="list-group-item">
+                                    <button id="remove-locale-{{loop.index}}" type="button" class="close" aria-hidden="true">&times;</button>
+                                    {{locale}}
+                                    {% if locale == defaultLocale %}<span class="label label-primary">Default</span>{%endif%}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
+
+                {% block sidebar %}
+                {% endblock %}
+                </div>
                 </div>
             </div>
-        </div>
-
-        <div class="container-fluid">
-            <div class="row-fluid">
-                <div class="span3">
-                    <div class="well">
-                        <h5>Available Locales</h5>
-
-                        <ul id="locales" style="padding: 0; margin: 0; list-style: none">
-                            {% for locale in localeList %}
-                            <li id="locale-{{loop.index}}" style="padding: 2px 0" data-id="{{ locale.getId() }}" data-index="{{loop.index}}">
-                                <input id="remove-locale-{{loop.index}}" class="btn btn-danger mysmall" type="button" value="Remove" />
-                                {{locale}}
-                                {% if locale == defaultLocale %}<span class="label">Default</span>{%endif%}
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-
-                    {% block sidebar %}
-                    {% endblock %}
-                </div>
-
-                <div class="span9">
-                    {% block body %}
-                    {% endblock %}
-                </div>
+            <div class="col-sm-10">
+                {% block body %}
+                {% endblock %}
             </div>
             <hr>
-            <footer>
+            <footer style="text-align: center; font-size: 10pt;">
                 <p>&copy; ServerGrove 2012</p>
             </footer>
         </div>
@@ -93,21 +98,37 @@
                 var li = $(e.target).parent();
                 confirm('Are you sure?') && removeLocale(li.data('index'), li.data('id'));
             });
-            $('#nav-new-locale').click(function() {
+            function showLocaleForm() {
+
+            }
+            $('#nav-new-locale').on('click', function() {
                 $('.alert-message').hide();
                 $('#newtranslation').hide();
-                var form = $('#newlocale').show();
+                $('#newtranslation form').hide();
+
+                $('#newlocale').fadeIn(500);
+                var form = $('#newlocale form').slideDown(500);
                 $('#language', form).focus();
             });
-            $('#nav-new-entry').click(function() {
+            $('#nav-new-entry').on('click', function() {
                 $('.alert-message').hide();
                 $('#newlocale').hide();
-                var form = $('#newtranslation').show();
+                $('#newlocale form').hide();
+
+                $('#newtranslation').fadeIn(500);
+                var form = $('#newtranslation form').slideDown(500);
                 $('#domain', form).focus();
             });
-            $('#nav-reload').click(function() {
+            $('#nav-reload').on('click', function() {
                 this.innerHTML = 'Reloading...';
                 window.location.reload();
+            });
+            $('.cancel-top-form').on('click', function(e) {
+                e.preventDefault();
+                $('.alert-message').hide();
+                var panel = $('.panel-top-form:visible');
+                panel.find('form').slideUp();
+                panel.fadeOut(500);
             });
         });
         </script>
