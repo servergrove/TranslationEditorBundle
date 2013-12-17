@@ -179,7 +179,7 @@ class ImportCommand extends AbstractCommand
         }
 
         $finder = new Finder();
-        $finder->files()->in($translationPath)->name('/^.+\.[a-z_]{2,7}\.[a-z]{2,5}$/');
+        $finder->files()->in($translationPath)->name('/^.+\.[a-zA-Z_]{2,7}\.[a-z]{2,5}$/');
 
         foreach ($finder as $translationFile) {
             $translationFilePath = $translationFile->getRealPath();
