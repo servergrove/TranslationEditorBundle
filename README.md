@@ -19,7 +19,7 @@ Export translations to translation files from MongoDB. If no files is specified,
 
 ## Screenshot
 
-<img src="http://farm8.staticflickr.com/7158/6668570353_1b852e0e7b_b_d.jpg" />
+<img src="https://f.cloud.github.com/assets/1287902/1782409/92f307e6-68ac-11e3-8c82-78741bc9b28f.png" />
 
 ## Installation:
 
@@ -97,7 +97,6 @@ Add the routing configuration to app/config/routing_dev.yml
 * Import strings from twig files
 * Ability to edit key
 * Add Google Translate API interface
-* Add Search capabilities
 
 **Pull requests are welcome! We open sourced this bundle hoping people find it useful. Please contribute back any enhancements.**
 
