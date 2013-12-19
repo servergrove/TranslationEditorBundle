@@ -17,6 +17,7 @@
         <style>
             body { padding-top: 70px; }
             .navbar {box-shadow: 0 0 5px #CBCBCB;}
+            .high {background: none repeat scroll 0 0 #FFED54};
         </style>
         <!-- Le fav and touch icons -->
         <link rel="shortcut icon" href="../assets/ico/favicon.ico">
@@ -48,9 +49,8 @@
                 </ul>
                 <form class="navbar-form navbar-left" role="search">
                   <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Search Alias or Value">
+                    <input type="text" class="form-control" placeholder="Filter Alias or Value" onkeyup="showEntryListMissing(this.value)">
                   </div>
-                  <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i> &nbsp;Send</button>
                 </form>
                 <ul class="nav navbar-nav navbar-right">
                   <li><a href="https://github.com/servergrove/TranslationEditorBundle">About</a></li>
@@ -80,16 +80,16 @@
                 {% block sidebar %}
                 {% endblock %}
                 </div>
+                <hr>
+                <footer class="center-content">
+                    <p>&copy; ServerGrove 2012</p>
+                </footer>
                 </div>
             </div>
             <div class="col-sm-10">
                 {% block body %}
                 {% endblock %}
             </div>
-            <hr>
-            <footer style="text-align: center; font-size: 10pt;">
-                <p>&copy; ServerGrove 2012</p>
-            </footer>
         </div>
 
         <script>

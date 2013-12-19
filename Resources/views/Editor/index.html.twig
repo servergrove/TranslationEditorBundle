@@ -14,7 +14,32 @@
                           .addClass('.table-striped');
     }
 
-    function showEntryListMissing()
+    function showEntryListMissing(val)
+    {
+        var $zebraStripedTable = $('.table-striped');
+
+        $zebraStripedTable.find('tbody tr').hide();
+        
+        // find alias
+        var $rows = $zebraStripedTable.find('tbody tr td.alias:contains('+ val +')');
+        $rows.parent('tr').show();
+        $rows.each(function() {
+            text = $(this).text().replace(val, '<span class="high">'+val+'</span>');
+            $(this).html(text);
+        });
+        //find values
+        var $rows = $zebraStripedTable.find('td .translation:contains('+ val +')');
+        $rows.closest('tr').show();
+        $rows.each(function() {
+            text = $(this).text().replace(val, '<span class="high">'+val+'</span>');
+            $(this).html(text);
+        });
+        // Update colors in remaining visible rows
+        $zebraStripedTable.removeClass('.table-striped')
+                          .addClass('.table-striped');
+    }
+
+    function showFilterEntries()
     {
         var $zebraStripedTable = $('.table-striped');
 
@@ -202,14 +227,14 @@
 }
 </style>
 
-    <div class="panel panel-info">
-        <div class="panel-heading">Stats</div>
-    {% if defaultLocale %}
-        <div class="list-groput">
-            <a href="#" onclick="showEntryListAll()" class="list-group-item">Entries: <span class="badge">{{ defaultLocale.getTranslations().count() }}</span></a>
-            <a href="#" onclick="showEntryListMissing()" class="list-group-item">Missing translations</a>
-        </div>
-    {% endif %}
+<div class="panel panel-info">
+    <div class="panel-heading">Stats</div>
+{% if defaultLocale %}
+    <div class="list-groput">
+        <a href="#" onclick="showEntryListAll()" class="list-group-item">Entries: <span class="badge">{{ defaultLocale.getTranslations().count() }}</span></a>
+        <a href="#" onclick="showEntryListMissing()" class="list-group-item">Missing translations</a>
+    </div>
+{% endif %}
 
 {% endblock %}
 
@@ -271,13 +296,12 @@
 <p id="insert-ok" class="alert alert-success" style="display: none"></p>
 <p id="insert-error" class="alert alert-error" style="display: none">An error ocurred while adding the translation<span id="errmsg"></span></p>
 
-<table class="table table-striped">
+<table class="table table-striped table-hover">
     <thead>
         <tr>
             <th></th>
             <th>Domain</th>
             <th>Alias</th>
-
             {% for locale in localeList %}
             <th>{{locale}} {% if locale == defaultLocale %}<span class="label">Default</span>{%endif%}</th>
             {% endfor %}
@@ -290,19 +314,17 @@
         {% for entry in entryList %}
         <tr id="entry-{{loop.index}}" {{ entry.getTranslations().count() != localeListCount ? 'class="missing"' : 'class="ok"' }}>
             <td>
-                <input id="remove-{{loop.index}}" class=" btn btn-danger mysmall" type="button" value="X" title="Remove" onclick="confirm('Are you sure?') && removeEntry('{{loop.index}}', '{{ entry.getId() }}')">
+                <button id="remove-{{loop.index}}" class="close" aria-hidden="true" data-placement="bottom" data-toggle="tooltip" title="Remove" onclick="confirm('Are you sure?') && removeEntry('{{loop.index}}', '{{ entry.getId() }}')">&times;</button>
             </td>
-
-            <td>{{ entry.getDomain() }}</td>
-
-            <td>{{ entry.getAlias() }}</td>
+            <td class="domain">{{ entry.getDomain() }}</td>
+            <td class="alias">{{ entry.getAlias() }}</td>
 
             {% for locale in localeList %}
             <td>
                 <div id="current-{{loop.parent.loop.index}}-{{locale}}">
                     {% set translation = entry.getTranslation(locale) %}
 
-                    <div id="current-{{loop.parent.loop.index}}-{{locale}}-content" onclick="showTranslationEditForm('{{loop.parent.loop.index}}-{{locale}}')">
+                    <div class="translation" id="current-{{loop.parent.loop.index}}-{{locale}}-content" onclick="showTranslationEditForm('{{loop.parent.loop.index}}-{{locale}}')">
                         {% if translation %}{{ translation.getValue() }}{% endif %}
                     </div>
 
@@ -316,10 +338,11 @@
                 </div>
 
                 <div id="editor-{{loop.parent.loop.index}}-{{locale}}" class="editor">
-                    <textarea>{% if translation %}{{ translation.getValue() }}{% endif %}</textarea>
-                    <br/>
-                    <input id="save-{{loop.parent.loop.index}}-{{locale}}"class="btn mysmall btn-primary" type="button" value="Save" onclick="saveTranslation('{{loop.parent.loop.index}}-{{locale}}', '{{entry.getId()}}', '{{locale.getId()}}')">
-                    <input class="btn mysmall" type="button" value="Cancel" onclick="hideTranslationEditForm('{{loop.parent.loop.index}}-{{locale}}')">
+                    <div class="form-group">
+                        <textarea class="form-control">{% if translation %}{{ translation.getValue() }}{% endif %}</textarea>
+                    </div>
+                    <input id="save-{{loop.parent.loop.index}}-{{locale}}"class="btn btn-sm btn-primary" type="button" value="Save" onclick="saveTranslation('{{loop.parent.loop.index}}-{{locale}}', '{{entry.getId()}}', '{{locale.getId()}}')">
+                    <input class="btn btn-sm btn-danger" type="button" value="Cancel" onclick="hideTranslationEditForm('{{loop.parent.loop.index}}-{{locale}}')">
                 </div>
             </td>
             {% endfor %}
