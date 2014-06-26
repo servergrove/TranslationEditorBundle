@@ -242,7 +242,7 @@
 <div class="panel panel-success panel-top-form" id="newtranslation" style="display: none" >
     <div class="panel-heading">New Entry</div>
     <div class="panel-body">
-        <form method="POST"  style="display:none" onsubmit="return saveEntryForm($('#newtranslation'))" action="{{path('sg_localeditor_add_translation')}}">
+        <form method="POST" id="newtranslationform" style="display:none" onsubmit="return saveEntryForm($('#newtranslationform'))" action="{{path('sg_localeditor_add_translation')}}">
             <div class="form-group input-group">
                 <label class="input-group-addon">Domain:</label>
                 <select id="domain" name="domain" class="form-control"/>
@@ -277,7 +277,7 @@
 <div class="panel panel-success panel-top-form" id="newlocale" style="display: none" >
     <div class="panel-heading">New Locale</div>
     <div class="panel-body">
-        <form method="POST" style="display:none" onsubmit="return saveLocaleForm($('#newlocale'))" action="{{path('sg_localeditor_add_locale')}}">
+        <form method="POST" id="newlocaleform" style="display:none" onsubmit="return saveLocaleForm($('#newlocaleform'))" action="{{path('sg_localeditor_add_locale')}}">
             <div class="form-group input-group">
                 <label class="input-group-addon">Language:</label>
                 <input type="text" id="language" name="language" maxlength="2" size="2" class="form-control"/>
