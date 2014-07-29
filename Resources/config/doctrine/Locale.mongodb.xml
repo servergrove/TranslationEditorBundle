@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mongo-mapping xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
+                http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
+
+    <document name="ServerGrove\Bundle\TranslationEditorBundle\Document\Locale"
+            table="sg_translation_entry">
+
+        <field fieldName="id"
+            name="id"
+            id="true"
+            strategy="AUTO">
+        </field>
+        
+        
+        <field fieldName="language"
+               name="language"
+               type="string"/>
+
+        <field fieldName="country"
+               name="country"
+               type="string"
+               nullable="true"/>
+
+        <field fieldName="active"
+               column="active"
+               type="boolean"/>
+   
+
+        <reference-many target-document="ServerGrove\Bundle\TranslationEditorBundle\Document\Translation" 
+                        field="translations"
+                        mapped-by="locale">
+            <cascade>
+                <all />
+            </cascade>
+        </reference-many>
+
+    </document>
+
+</doctrine-mongo-mapping>

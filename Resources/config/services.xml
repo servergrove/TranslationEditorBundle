@@ -14,6 +14,10 @@
         <service id="server_grove_translation_editor.storage.orm" class="ServerGrove\Bundle\TranslationEditorBundle\Storage\ORMStorage">
             <argument type="service" id="server_grove_translation_editor.storage.manager"/>
         </service>
+        
+        <service id="server_grove_translation_editor.storage.mongodb" class="ServerGrove\Bundle\TranslationEditorBundle\Storage\MongoDBStorage">
+            <argument type="service" id="server_grove_translation_editor.storage.manager"/>
+        </service>
 
         <service id="server_grove_translation_editor.storage.manager" factory-method="get" factory-service="service_container" class="Doctrine\Common\Persistence\ObjectManager" public="false">
             <argument>%server_grove_translation_editor.storage.manager%</argument>

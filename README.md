@@ -61,12 +61,19 @@ We recommend that you only enable this bundle for the development environments, 
 
 The collection parameter allows you to define the collection that will contain the translations for the project, so you can have multiple Symfony2 projects in the same mongodb server.
 
-A sample configuration (in your config_dev.yml):
+A sample Doctrine ORM configuration (in your config_dev.yml):
 
     server_grove_translation_editor:
       storage:
         type: server_grove_translation_editor.storage.orm
         manager: doctrine.orm.entity_manager
+
+Doctrine MongoDB configuration (in your config_dev.yml):
+
+    server_grove_translation_editor:
+      storage:
+        type: server_grove_translation_editor.storage.mongodb
+        manager: doctrine_mongodb.odm.document_manager
 
 Add the routing configuration to app/config/routing_dev.yml
 
