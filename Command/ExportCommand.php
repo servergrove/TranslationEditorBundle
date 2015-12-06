@@ -83,7 +83,7 @@ class ExportCommand extends Base
 
         list($name, $locale, $type) = explode('.', $fname);
 
-        $data = $this->getContainer()->get('server_grove_translation_editor.storage_manager')->getCollection()->findOne(array('filename'=>$filename));
+        $data = $this->getContainer()->get('server_grove_translation_editor.storage_manager')->getCollection()->findOne(array('locale'=>$locale));
         if (!$data) {
             $this->output->writeln("Could not find data for this locale");
             return;
