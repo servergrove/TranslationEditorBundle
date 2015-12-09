@@ -1,15 +1,15 @@
 sg_localeditor_list:
-    pattern:  /translations/editor
+    path:  /translations/editor
     defaults: { _controller: ServerGroveTranslationEditorBundle:Editor:list }
 
 sg_localeditor_update:
-    pattern:  /translations/update
+    path:  /translations/update
     defaults: { _controller: ServerGroveTranslationEditorBundle:Editor:update }
 
 sg_localeditor_add:
-    pattern:  /translations/add
+    path:  /translations/add
     defaults: { _controller: ServerGroveTranslationEditorBundle:Editor:add }
 
 sg_localeditor_remove:
-    pattern:  /translations/remove
+    path:  /translations/remove
     defaults: { _controller: ServerGroveTranslationEditorBundle:Editor:remove }

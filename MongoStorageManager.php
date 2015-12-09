@@ -18,7 +18,7 @@ class MongoStorageManager extends ContainerAware
        function getMongo()
        {
            if (!$this->mongo) {
-               $this->mongo = new \Mongo($this->container->getParameter('translation_editor.mongodb'));
+               $this->mongo = new \MongoClient($this->container->getParameter('translation_editor.mongodb'));
            }
 
            if (!$this->mongo) {
